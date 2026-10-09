@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+{% block title %}Project Sites{% endblock %}
+{% block page_title %}Project Sites{% endblock %}
+{% block nav_prj %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  .approval-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .22rem .55rem;
+    border-radius: 5px;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .approval-badge.pending {
+    background: rgba(245,158,11,.12);
+    color: #fbbf24;
+    border: 1px solid rgba(245,158,11,.25);
+  }
+  .approval-badge.approved {
+    background: rgba(16,185,129,.12);
+    color: #34d399;
+    border: 1px solid rgba(16,185,129,.25);
+  }
+  .approval-badge.rejected {
+    background: rgba(239,68,68,.12);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,.25);
+  }
+  .map-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(6px);
+    z-index: 9990;
+    justify-content: center;
+    align-items: center;
+  }
+  .map-modal-overlay.active {
+    display: flex;
+  }
+  .map-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 90%;
+    max-width: 650px;
+    overflow: hidden;
+    animation: modal-in .25s ease;
+  }
+  @keyframes modal-in {
+    from { transform: scale(.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .map-modal-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .map-modal-head h5 {
+    margin: 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  .map-modal-close {
+    background: none;
+    border: none;
+    color: var(--dim);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: .25rem;
+    border-radius: 6px;
+    transition: .2s;
+  }
+  .map-modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--accent-r);
+  }
+  #modal-map {
+    height: 380px;
+    width: 100%;
+  }
+  .map-modal-footer {
+    padding: .85rem 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: .78rem;
+    color: var(--muted);
+  }
+  .created-by-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: .2rem;
+  }
+  .created-by-tag i { font-size: .7rem; }
+  .pending-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 .35rem;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    font-size: .68rem;
+    font-weight: 800;
+    margin-left: .4rem;
+  }
+  .btn-approve {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .38rem .65rem;
+    border-radius: 7px;
+    border: 1px solid rgba(16,185,129,.25);
+    background: rgba(16,185,129,.1);
+    color: #34d399;
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 600;
+    transition: all .2s;
+    cursor: pointer;
+  }
+  .btn-approve:hover {
+    background: #10b981;
+    color: var(--text);
+    border-color: #10b981;
+  }
+  .btn-reject {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .38rem .65rem;
+    border-radius: 7px;
+    border: 1px solid rgba(239,68,68,.25);
+    background: rgba(239,68,68,.1);
+    color: #f87171;
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 600;
+    transition: all .2s;
+    cursor: pointer;
+  }
+  .btn-reject:hover {
+    background: #ef4444;
+    color: var(--text);
+    border-color: #ef4444;
+  }
+  .map-pin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid rgba(139,92,246,.25);
+    background: rgba(139,92,246,.1);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+  }
+  .map-pin-btn:hover {
+    background: rgba(139,92,246,.25);
+    border-color: rgba(139,92,246,.4);
+    color: #c4b5fd;
+  }
+  .no-gps {
+    color: #52525b;
+    font-size: .72rem;
+    font-style: italic;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <form method="get" class="d-flex gap-2 flex-wrap">
+    <div style="position:relative;">
+      <i class="bi bi-search" style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:#52525b;font-size:.84rem;pointer-events:none;"></i>
+      <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Search project…"
+        style="background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.46rem .8rem .46rem 2.1rem;font-size:.84rem;width:220px;">
+    </div>
+    <select name="status" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.46rem .8rem;font-size:.84rem;">
+      <option value="">All Status</option>
+      <option value="planning" {% if status_filter == 'planning' %}selected{% endif %}>Planning</option>
+      <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+      <option value="on_hold" {% if status_filter == 'on_hold' %}selected{% endif %}>On Hold</option>
+      <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+    </select>
+    {% if is_admin %}
+    <select name="approval" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.46rem .8rem;font-size:.84rem;">
+      <option value="">All Approval</option>
+      <option value="pending" {% if approval_filter == 'pending' %}selected{% endif %}>⏳ Pending</option>
+      <option value="approved" {% if approval_filter == 'approved' %}selected{% endif %}>✅ Approved</option>
+      <option value="rejected" {% if approval_filter == 'rejected' %}selected{% endif %}>❌ Rejected</option>
+    </select>
+    {% endif %}
+    <button type="submit" class="btn-o" style="padding:.43rem .9rem;">Filter</button>
+  </form>
+  <div class="d-flex align-items-center gap-2">
+    {% if is_admin and pending_count > 0 %}
+    <a href="?approval=pending" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fbbf24;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s;">
+      <i class="bi bi-clock-history"></i> Pending
+      <span class="pending-count-badge">{{ pending_count }}</span>
+    </a>
+    {% endif %}
+    <a href="/insertprojectsite/" class="btn-y"><i class="bi bi-plus-lg"></i> New Project</a>
+  </div>
+</div>
+
+<!-- Stat strip -->
+<div class="row g-2 mb-3">
+  <div class="col-6 col-md-3 fu"><div class="stat a"><div class="d-flex justify-content-between"><div><div class="stat-num">{{ projects|length }}</div><div class="stat-lbl">Total</div></div><div class="stat-ico a"><i class="bi bi-map"></i></div></div></div></div>
+  <div class="col-6 col-md-3 fu"><div class="stat g"><div class="d-flex justify-content-between"><div><div class="stat-num" id="active-count">0</div><div class="stat-lbl">Active</div></div><div class="stat-ico g"><i class="bi bi-check2-circle"></i></div></div></div></div>
+  {% if is_admin %}
+  <div class="col-6 col-md-3 fu"><div class="stat r"><div class="d-flex justify-content-between"><div><div class="stat-num">{{ pending_count }}</div><div class="stat-lbl">Pending Approval</div></div><div class="stat-ico r"><i class="bi bi-clock-history"></i></div></div></div></div>
+  {% else %}
+  <div class="col-6 col-md-3 fu"><div class="stat r"><div class="d-flex justify-content-between"><div><div class="stat-num" id="hold-count">0</div><div class="stat-lbl">On Hold</div></div><div class="stat-ico r"><i class="bi bi-pause-circle"></i></div></div></div></div>
+  {% endif %}
+  <div class="col-6 col-md-3 fu"><div class="stat b"><div class="d-flex justify-content-between"><div><div class="stat-num" id="done-count">0</div><div class="stat-lbl">Completed</div></div><div class="stat-ico b"><i class="bi bi-flag"></i></div></div></div></div>
+</div>
+
+<div class="row g-3">
+  {% for p in projects %}
+  <div class="col-md-6 col-xl-4 fu">
+    <div class="card h-100" style="transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(245,158,11,.35)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="padding:1.2rem;">
+        <!-- Status & Approval badges -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.85rem;">
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.15rem;">{{ p.site_name }}</div>
+            <div style="font-size:.75rem;color:#52525b;">{{ p.project_type }}</div>
+            {% if p.created_by %}
+            <div class="created-by-tag"><i class="bi bi-person"></i> Added by {{ p.created_by.name }}</div>
+            {% endif %}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.3rem;align-items:flex-end;">
+            <!-- Project status badge -->
+            {% if p.status == 'active' %}<span class="badge badge-green">Active</span>
+            {% elif p.status == 'planning' %}<span class="badge badge-blue">Planning</span>
+            {% elif p.status == 'on_hold' %}<span class="badge badge-amber">On Hold</span>
+            {% else %}<span class="badge badge-gray">Completed</span>{% endif %}
+            <!-- Approval badge -->
+            {% if p.approval_status == 'pending' %}
+            <span class="approval-badge pending"><i class="bi bi-clock"></i> Pending</span>
+            {% elif p.approval_status == 'approved' %}
+            <span class="approval-badge approved"><i class="bi bi-check-circle"></i> Approved</span>
+            {% elif p.approval_status == 'rejected' %}
+            <span class="approval-badge rejected"><i class="bi bi-x-circle"></i> Rejected</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div style="display:flex;flex-direction:column;gap:.3rem;margin-bottom:.85rem;">
+          <div style="font-size:.78rem;color:var(--muted);display:flex;gap:.4rem;align-items:flex-start;">
+            <i class="bi bi-geo-alt" style="color:#52525b;flex-shrink:0;margin-top:.1rem;"></i>
+            <span>{{ p.location|truncatechars:55 }}</span>
+          </div>
+          <div style="font-size:.76rem;color:#52525b;display:flex;gap:.75rem;">
+            <span><i class="bi bi-calendar-event me-1"></i>{{ p.start_date }}</span>
+            <span><i class="bi bi-calendar-check me-1"></i>{{ p.expected_end_date }}</span>
+          </div>
+          <!-- GPS indicator -->
+          <div style="margin-top:.2rem;">
+            {% if p.latitude and p.longitude %}
+            <button type="button" class="map-pin-btn" onclick="openMapModal('{{ p.site_name|escapejs }}', {{ p.latitude }}, {{ p.longitude }}, '{{ p.location|escapejs }}')" title="View on map">
+              <i class="bi bi-geo-alt-fill"></i>
+            </button>
+            {% else %}
+            <span class="no-gps"><i class="bi bi-geo"></i> No GPS data</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          {% if is_admin and p.approval_status == 'pending' %}
+          <!-- Admin: Approve / Reject buttons for pending sites -->
+          <a href="/approveprojectsite/{{ p.id }}/" class="btn-approve" onclick="return confirm('Approve this project site?')">
+            <i class="bi bi-check-lg"></i> Approve
+          </a>
+          <a href="/rejectprojectsite/{{ p.id }}/" class="btn-reject" onclick="return confirm('Reject this project site?')">
+            <i class="bi bi-x-lg"></i> Reject
+          </a>
+          {% endif %}
+
+          {% if is_admin %}
+          <a href="/editprojectsite/{{ p.id }}/" class="btn-o" style="flex:1;justify-content:center;font-size:.8rem;padding:.4rem .65rem;"><i class="bi bi-pencil"></i> Edit</a>
+          <a href="/delprojectsite/{{ p.id }}/" class="btn-r" style="justify-content:center;font-size:.8rem;padding:.4rem .65rem;" onclick="return confirm('Delete this project?')"><i class="bi bi-trash"></i></a>
+          {% else %}
+            {% if p.created_by.id == current_user.id and p.approval_status == 'pending' %}
+            <a href="/editprojectsite/{{ p.id }}/" class="btn-o" style="flex:1;justify-content:center;font-size:.8rem;padding:.4rem .65rem;"><i class="bi bi-pencil"></i> Edit</a>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="card"><div class="empty"><i class="bi bi-map"></i>No projects found.<br><a href="/insertprojectsite/" style="color:var(--accent);font-size:.84rem;">Create first project →</a></div></div></div>
+  {% endfor %}
+</div>
+
+<!-- ── MAP MODAL ────────────────────────────────────── -->
+<div class="map-modal-overlay" id="map-modal-overlay" onclick="closeMapModal(event)">
+  <div class="map-modal">
+    <div class="map-modal-head">
+      <h5><i class="bi bi-geo-alt-fill me-2" style="color:var(--accent-p)"></i><span id="modal-site-name">Project Site</span></h5>
+      <button class="map-modal-close" onclick="closeMapModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div id="modal-map"></div>
+    <div class="map-modal-footer">
+      <i class="bi bi-geo-alt me-1"></i> <span id="modal-address">—</span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── Count stats from rendered cards ──
+let activeC = 0, holdC = 0, doneC = 0;
+{% for p in projects %}
+  {% if p.status == 'active' %}activeC++;{% endif %}
+  {% if p.status == 'on_hold' %}holdC++;{% endif %}
+  {% if p.status == 'completed' %}doneC++;{% endif %}
+{% endfor %}
+const acEl = document.getElementById('active-count');
+const hcEl = document.getElementById('hold-count');
+const dcEl = document.getElementById('done-count');
+if (acEl) acEl.textContent = activeC;
+if (hcEl) hcEl.textContent = holdC;
+if (dcEl) dcEl.textContent = doneC;
+
+// ── MAP MODAL ──────────────────────────────────────
+let modalMap = null;
+let modalMarker = null;
+
+function openMapModal(siteName, lat, lng, address) {
+  document.getElementById('modal-site-name').textContent = siteName;
+  document.getElementById('modal-address').textContent = address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  document.getElementById('map-modal-overlay').classList.add('active');
+
+  setTimeout(() => {
+    if (modalMap) {
+      modalMap.remove();
+      modalMap = null;
+    }
+
+    modalMap = L.map('modal-map', {
+      zoomControl: true,
+      scrollWheelZoom: true
+    }).setView([lat, lng], 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19
+    }).addTo(modalMap);
+
+    modalMarker = L.marker([lat, lng]).addTo(modalMap)
+      .bindPopup(`<strong>📍 ${siteName}</strong>`)
+      .openPopup();
+
+    modalMap.invalidateSize();
+  }, 150);
+}
+
+function closeMapModal(event) {
+  if (event && event.target !== document.getElementById('map-modal-overlay')) return;
+  document.getElementById('map-modal-overlay').classList.remove('active');
+  if (modalMap) {
+    modalMap.remove();
+    modalMap = null;
+  }
+}
+
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMapModal();
+});
+</script>
+{% endblock %}

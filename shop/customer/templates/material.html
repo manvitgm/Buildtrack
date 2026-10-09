@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% block title %}Add Material{% endblock %}
+{% block page_title %}Add Material{% endblock %}
+{% block nav_mat %}active{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar mb-3">
+  <a href="/viewmaterial/" style="color:var(--accent);text-decoration:none;">Materials</a>
+  <span class="sep"> / </span>
+  <span class="cur">Add New</span>
+</div>
+
+<div class="row g-3">
+
+  <!-- LEFT -->
+
+  <div class="col-lg-8">
+
+    <div class="card">
+
+      <div class="card-head">
+        <h5>
+          <i class="bi bi-box-seam me-2" style="color:var(--accent)"></i>
+          Material Details
+        </h5>
+      </div>
+
+      <div class="card-body-pad">
+
+        <form method="post" enctype="multipart/form-data">
+
+          {% csrf_token %}
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="f-label">Material Name *</label>
+              <input type="text"
+                     name="material_name"
+                     class="f-ctrl"
+                     placeholder="Enter material name"
+                     required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Material Code *</label>
+              <input type="text"
+                     name="material_code"
+                     class="f-ctrl"
+                     placeholder="Ex: MAT-101"
+                     required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Supplier *</label>
+
+              <select name="supplier" class="f-ctrl" required>
+
+                <option value="">Select Supplier</option>
+
+                {% for s in suppliers %}
+                <option value="{{ s.id }}">
+                  {{ s.company_name }}
+                </option>
+                {% endfor %}
+
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Category *</label>
+
+              <select name="category" class="f-ctrl" required>
+
+                <option value="">Select Category</option>
+
+                {% for c in categories %}
+                <option value="{{ c.id }}">
+                  {{ c.category_name }}
+                </option>
+                {% endfor %}
+
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="f-label">Price (₹) *</label>
+              <input type="number"
+                     step="0.01"
+                     name="price"
+                     id="priceInput"
+                     class="f-ctrl"
+                     placeholder="0.00"
+                     required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="f-label">Unit *</label>
+
+              <select name="unit" id="unitInput" class="f-ctrl" required>
+                <option value="">Select Unit</option>
+                <option value="Bag">Bag</option>
+                <option value="Box">Box</option>
+                <option value="Bundle">Bundle</option>
+                <option value="Cubic Meter">Cubic Meter</option>
+                <option value="Gallon">Gallon</option>
+                <option value="Kg">Kg</option>
+                <option value="Litre">Litre</option>
+                <option value="Meter">Meter</option>
+                <option value="Packet">Packet</option>
+                <option value="Piece">Piece</option>
+                <option value="Roll">Roll</option>
+                <option value="Square Meter">Square Meter</option>
+                <option value="Ton">Ton</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="f-label">Stock Quantity</label>
+              <input type="number"
+                     name="stock_quantity"
+                     id="stockInput"
+                     class="f-ctrl"
+                     placeholder="0">
+            </div>
+
+            <div class="col-12">
+              <label class="f-label">Description</label>
+
+              <textarea name="description"
+                        rows="4"
+                        class="f-ctrl"
+                        placeholder="Enter material description, quality, grade, usage..."></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="f-label">Material Photo</label>
+
+              <input type="file"
+                     name="photo"
+                     class="f-ctrl"
+                     accept="image/*">
+            </div>
+
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+
+            <button type="submit" class="btn-y">
+              <i class="bi bi-check-lg"></i>
+              Save Material
+            </button>
+
+            <a href="/viewmaterial/" class="btn-b">
+              <i class="bi bi-arrow-left"></i>
+              Back
+            </a>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+
+  <div class="col-lg-4">
+
+    <div class="card">
+
+      <div class="card-head">
+        <h5>
+          <i class="bi bi-eye me-2" style="color:var(--accent-g)"></i>
+          Live Preview
+        </h5>
+      </div>
+
+      <div class="card-body-pad">
+
+        <div style="text-align:center">
+
+          <div style="font-size:.7rem;color:var(--muted);margin-bottom:.5rem;">
+            PRICE PREVIEW
+          </div>
+
+          <div id="pricePreview"
+               style="font-size:2.2rem;font-weight:800;color:var(--accent);font-family:'Barlow Condensed',sans-serif;">
+
+            ₹0.00
+
+          </div>
+
+          <div id="unitPreview"
+               style="color:var(--muted);margin-top:.3rem;">
+
+            per unit
+
+          </div>
+
+        </div>
+
+        <hr style="border-color:var(--border);margin:1.2rem 0;">
+
+        <div style="font-size:.85rem;line-height:1.9;">
+
+          <div>
+            📦 Stock:
+            <span id="stockPreview">0</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+const priceInput = document.getElementById('priceInput');
+const unitInput = document.getElementById('unitInput');
+const stockInput = document.getElementById('stockInput');
+
+function updatePreview(){
+
+    const price = parseFloat(priceInput.value || 0);
+
+    document.getElementById('pricePreview').innerHTML =
+        '₹' + price.toLocaleString('en-IN', {
+            minimumFractionDigits:2
+        });
+
+    document.getElementById('unitPreview').innerHTML =
+        'per ' + unitInput.value;
+
+    document.getElementById('stockPreview').innerHTML =
+        stockInput.value || 0;
+
+}
+
+priceInput.addEventListener('input', updatePreview);
+unitInput.addEventListener('change', updatePreview);
+stockInput.addEventListener('input', updatePreview);
+
+updatePreview();
+
+</script>
+
+{% endblock %}

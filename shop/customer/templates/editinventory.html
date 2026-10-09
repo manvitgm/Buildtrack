@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Inventory{% endblock %}
+{% block page_title %}Edit Inventory{% endblock %}
+{% block nav_inv %}active{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar">
+  <a href="/viewinventory/">Inventory</a>
+  <span class="sep">/</span>
+  <span class="cur">Edit Record</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card fu">
+      <div class="card-head">
+        <h5>
+          <i class="bi bi-pencil-square me-2" style="color:var(--accent)"></i>
+          Edit Inventory
+        </h5>
+      </div>
+
+      <div class="card-body-pad">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+
+            <!-- Project Site -->
+            <div class="col-md-6">
+              <label class="f-label">Project Site *</label>
+              <select class="f-ctrl" name="project_site" required>
+                <option value="">-- Select Project Site --</option>
+                {% for p in projects %}
+                <option value="{{ p.id }}" {% if p.id == x.project_site.id %}selected{% endif %}>
+                  {{ p.site_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Material -->
+            <div class="col-md-6">
+              <label class="f-label">Material *</label>
+              <select class="f-ctrl" name="material" required>
+                <option value="">-- Select Material --</option>
+                {% for m in materials %}
+                <option value="{{ m.id }}" {% if m.id == x.material.id %}selected{% endif %}>
+                  {{ m.material_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Available Quantity -->
+            <div class="col-md-6">
+              <label class="f-label">Available Quantity *</label>
+              <input type="number" name="available_quantity" class="f-ctrl" value="{{ x.available_quantity }}" required>
+            </div>
+
+            <!-- Used Quantity -->
+            <div class="col-md-6">
+              <label class="f-label">Used Quantity *</label>
+              <input type="number" name="used_quantity" class="f-ctrl" value="{{ x.used_quantity }}" required>
+            </div>
+
+          </div>
+
+          <hr class="divider">
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-y">
+              <i class="bi bi-check-lg"></i> Update Inventory
+            </button>
+            <a href="/viewinventory/" class="btn-o">
+              <i class="bi bi-x"></i> Cancel
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block page_title %}Order Details{% endblock %}
+{% block nav_ord %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+
+/* ====== ORDER DETAIL — AMAZON STYLE ====== */
+
+.od-back{display:inline-flex;align-items:center;gap:.4rem;color:var(--dim);text-decoration:none;font-size:.84rem;font-weight:500;margin-bottom:1rem;transition:.2s;}
+.od-back:hover{color:var(--accent);}
+
+.od-grid{display:grid;grid-template-columns:1fr 340px;gap:1.2rem;}
+@media(max-width:900px){.od-grid{grid-template-columns:1fr;}}
+
+/* Main Card */
+.od-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.od-card-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.od-card-head h3{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;display:flex;align-items:center;gap:.5rem;margin:0;}
+.od-card-body{padding:1.25rem;}
+
+/* Info Grid */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.2rem;}
+.info-item .i-label{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.2rem;}
+.info-item .i-value{font-size:.88rem;font-weight:600;}
+
+/* Items Table */
+.items-list{margin-top:.5rem;}
+.item-row{display:flex;align-items:center;gap:1rem;padding:.7rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);}
+.item-row:last-child{border-bottom:none;}
+.item-thumb{width:56px;height:56px;border-radius:10px;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.item-thumb img{width:100%;height:100%;object-fit:cover;}
+.item-thumb i{font-size:1.4rem;color:var(--muted);}
+.item-detail{flex:1;min-width:0;}
+.item-detail .name{font-weight:600;font-size:.9rem;}
+.item-detail .sub{font-size:.75rem;color:var(--muted);margin-top:.15rem;}
+.item-total{text-align:right;flex-shrink:0;}
+.item-total .price{font-weight:700;font-size:1rem;color:var(--accent);}
+.item-total .calc{font-size:.72rem;color:var(--muted);}
+
+/* Stepper (reused from list page) */
+.tracking-stepper{display:flex;align-items:center;margin:1.2rem 0 .6rem;gap:0;}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;}
+.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;border:2px solid var(--border);background:var(--bg);color:var(--muted);transition:.3s;}
+.step.done .step-dot{background:var(--accent-g);border-color:var(--accent-g);color:var(--text);}
+.step.active .step-dot{background:var(--accent);border-color:var(--accent);color:#000;box-shadow:0 0 12px rgba(245,158,11,.4);}
+.step-label{font-size:.62rem;margin-top:.4rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;text-align:center;}
+.step.done .step-label{color:var(--accent-g);}
+.step.active .step-label{color:var(--accent);}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 -8px;position:relative;top:-14px;z-index:0;}
+.step-line.done{background:var(--accent-g);}
+.step-line.active{background:linear-gradient(90deg,var(--accent-g),var(--accent));}
+
+/* Status Badges */
+.status-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .75rem;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.badge-placed{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.25);}
+.badge-processing{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25);}
+.badge-shipped{background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.25);}
+.badge-out_for_delivery{background:rgba(14,165,233,.12);color:#38bdf8;border:1px solid rgba(14,165,233,.25);}
+.badge-delivered{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25);}
+.badge-cancelled{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25);}
+
+/* Summary card */
+.sum-row{display:flex;justify-content:space-between;padding:.5rem 0;font-size:.86rem;}
+.sum-row.total{border-top:1px solid var(--border);margin-top:.5rem;padding-top:.8rem;font-weight:800;font-size:1.1rem;}
+.sum-row.total .sum-val{color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;}
+.sum-label{color:var(--muted);}
+.sum-val{font-weight:600;}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="/viewmaterialorder/" class="od-back">
+  <i class="bi bi-arrow-left"></i> Back to Orders
+</a>
+
+<div class="od-grid">
+
+  <!-- LEFT: Main Content -->
+  <div>
+
+    <!-- Order Info Card -->
+    <div class="od-card" style="margin-bottom:1rem;">
+      <div class="od-card-head">
+        <h3><i class="bi bi-receipt" style="color:var(--accent)"></i> Order #{{ order.id }}</h3>
+        <span class="status-badge badge-{{ order.order_status }}">{{ order.get_order_status_display }}</span>
+      </div>
+      <div class="od-card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="i-label">Placed On</div>
+            <div class="i-value">{{ order.order_date|date:"d M Y, h:i A" }}</div>
+          </div>
+          <div class="info-item">
+            <div class="i-label">Project Site</div>
+            <div class="i-value">{{ order.project_site.site_name }}</div>
+          </div>
+          <div class="info-item">
+            <div class="i-label">Supplier</div>
+            <div class="i-value">{{ order.supplier.company_name }}</div>
+          </div>
+          <div class="info-item">
+            <div class="i-label">Ordered By</div>
+            <div class="i-value">{{ order.ordered_by.name }}</div>
+          </div>
+          {% if order.tracking_id %}
+          <div class="info-item">
+            <div class="i-label">Tracking ID</div>
+            <div class="i-value" style="color:var(--accent);">{{ order.tracking_id }}</div>
+          </div>
+          {% endif %}
+          {% if order.expected_delivery_date %}
+          <div class="info-item">
+            <div class="i-label">Expected Delivery</div>
+            <div class="i-value">{{ order.expected_delivery_date|date:"d M Y" }}</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Tracking Stepper -->
+        {% if order.order_status != 'cancelled' %}
+        <div class="tracking-stepper">
+          {% with st=order.order_status %}
+          <div class="step {% if st == 'placed' %}active{% elif st != 'placed' %}done{% endif %}">
+            <div class="step-dot"><i class="bi bi-bag-check"></i></div><div class="step-label">Placed</div>
+          </div>
+          <div class="step-line {% if st == 'processing' or st == 'shipped' or st == 'out_for_delivery' or st == 'delivered' %}done{% endif %}"></div>
+          <div class="step {% if st == 'processing' %}active{% elif st == 'shipped' or st == 'out_for_delivery' or st == 'delivered' %}done{% endif %}">
+            <div class="step-dot"><i class="bi bi-gear"></i></div><div class="step-label">Processing</div>
+          </div>
+          <div class="step-line {% if st == 'shipped' or st == 'out_for_delivery' or st == 'delivered' %}done{% elif st == 'processing' %}active{% endif %}"></div>
+          <div class="step {% if st == 'shipped' %}active{% elif st == 'out_for_delivery' or st == 'delivered' %}done{% endif %}">
+            <div class="step-dot"><i class="bi bi-truck"></i></div><div class="step-label">Shipped</div>
+          </div>
+          <div class="step-line {% if st == 'out_for_delivery' or st == 'delivered' %}done{% elif st == 'shipped' %}active{% endif %}"></div>
+          <div class="step {% if st == 'out_for_delivery' %}active{% elif st == 'delivered' %}done{% endif %}">
+            <div class="step-dot"><i class="bi bi-bicycle"></i></div><div class="step-label">Out for Delivery</div>
+          </div>
+          <div class="step-line {% if st == 'delivered' %}done{% elif st == 'out_for_delivery' %}active{% endif %}"></div>
+          <div class="step {% if st == 'delivered' %}done{% endif %}">
+            <div class="step-dot"><i class="bi bi-check-lg"></i></div><div class="step-label">Delivered</div>
+          </div>
+          {% endwith %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Items Card -->
+    <div class="od-card">
+      <div class="od-card-head">
+        <h3><i class="bi bi-box-seam" style="color:var(--accent-b)"></i> Order Items ({{ items|length }})</h3>
+      </div>
+      <div class="od-card-body">
+        <div class="items-list">
+          {% for item in items %}
+          <div class="item-row">
+            <div class="item-thumb">
+              {% if item.material.photo %}
+                <img src="{{ item.material.photo.url }}" alt="{{ item.material.material_name }}">
+              {% else %}
+                <i class="bi bi-box-seam"></i>
+              {% endif %}
+            </div>
+            <div class="item-detail">
+              <div class="name">{{ item.material.material_name }}</div>
+              <div class="sub">{{ item.material.material_code|default:"—" }} · {{ item.material.unit }} · {{ item.material.category }}</div>
+            </div>
+            <div class="item-total">
+              <div class="price">₹{{ item.subtotal }}</div>
+              <div class="calc">{{ item.quantity }} × ₹{{ item.unit_price }}</div>
+            </div>
+          </div>
+          {% empty %}
+          <p style="color:var(--muted);text-align:center;padding:1rem;">No items found.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Summary Sidebar -->
+  <div>
+
+    <!-- Order Summary -->
+    <div class="od-card" style="margin-bottom:1rem;">
+      <div class="od-card-head">
+        <h3><i class="bi bi-calculator" style="color:var(--accent-g)"></i> Summary</h3>
+      </div>
+      <div class="od-card-body">
+        <div class="sum-row">
+          <span class="sum-label">Items ({{ items|length }})</span>
+          <span class="sum-val">₹{{ order.total_amount }}</span>
+        </div>
+        <div class="sum-row">
+          <span class="sum-label">Shipping</span>
+          <span class="sum-val" style="color:var(--accent-g);">FREE</span>
+        </div>
+        <div class="sum-row total">
+          <span>Order Total</span>
+          <span class="sum-val">₹{{ order.total_amount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Info -->
+    {% if pay %}
+    <div class="od-card" style="margin-bottom:1rem;">
+      <div class="od-card-head">
+        <h3><i class="bi bi-credit-card" style="color:var(--accent-p)"></i> Payment</h3>
+      </div>
+      <div class="od-card-body">
+        <div class="info-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="info-item">
+            <div class="i-label">Method</div>
+            <div class="i-value">
+              {% if pay.payment_method == 'upi' %}📱{% elif pay.payment_method == 'razorpay' %}💳{% elif pay.payment_method == 'bank' %}🏦{% else %}💵{% endif %}
+              {{ pay.get_payment_method_display }}
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="i-label">Status</div>
+            <div class="i-value">
+              <span class="status-badge badge-{% if pay.status == 'paid' %}delivered{% elif pay.status == 'pending' %}placed{% elif pay.status == 'failed' %}cancelled{% else %}shipped{% endif %}">
+                {{ pay.get_status_display }}
+              </span>
+            </div>
+          </div>
+          {% if pay.transaction_id %}
+          <div class="info-item" style="grid-column:1/-1;">
+            <div class="i-label">Transaction ID</div>
+            <div class="i-value" style="color:var(--accent);font-family:monospace;">{{ pay.transaction_id }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Delivery Info -->
+    {% if dlv %}
+    <div class="od-card" style="margin-bottom:1rem;">
+      <div class="od-card-head">
+        <h3><i class="bi bi-truck" style="color:var(--accent-g)"></i> Delivery</h3>
+      </div>
+      <div class="od-card-body">
+        <div class="info-grid" style="grid-template-columns:1fr;">
+          <div class="info-item">
+            <div class="i-label">Delivery Date</div>
+            <div class="i-value">{{ dlv.delivery_date|date:"d M Y" }}</div>
+          </div>
+          <div class="info-item">
+            <div class="i-label">Status</div>
+            <div class="i-value">{{ dlv.delivery_status }}</div>
+          </div>
+          {% if dlv.delivery_note %}
+          <div class="info-item">
+            <div class="i-label">Note</div>
+            <div class="i-value" style="font-weight:400;color:var(--dim);">{{ dlv.delivery_note }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="od-card">
+      <div class="od-card-body" style="display:flex;flex-direction:column;gap:.6rem;">
+
+        {% if order.order_status == 'placed' or order.order_status == 'processing' %}
+        <a href="/cancel_order/{{ order.id }}/" class="btn-r" style="width:100%;justify-content:center;"
+           onclick="return confirm('Are you sure you want to cancel this order? Stock will be restored and payment refunded.')">
+          <i class="bi bi-x-circle"></i> Cancel Order
+        </a>
+        {% endif %}
+
+        <a href="/viewmaterialorder/" class="btn-b" style="width:100%;justify-content:center;">
+          <i class="bi bi-arrow-left"></i> Back to Orders
+        </a>
+
+        {% if request.session.user_role == 'admin' %}
+        <a href="/delmaterialorder/{{ order.id }}/" class="btn-r" style="width:100%;justify-content:center;"
+           onclick="return confirm('Delete this order?')">
+          <i class="bi bi-trash3"></i> Delete Order
+        </a>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

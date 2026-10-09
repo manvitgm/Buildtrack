@@ -1,0 +1,48 @@
+<!-- templates/editmaterialcategory.html -->
+{% extends 'base.html' %}
+
+{% block title %}Edit Category{% endblock %}
+{% block page_title %}Edit Category{% endblock %}
+{% block nav_cat %}active{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-head">
+        <h5>Edit Material Category</h5>
+    </div>
+
+    <div class="card-body-pad">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="f-group">
+                <label class="f-label">Category Name</label>
+                <input type="text" name="t1" class="f-ctrl" value="{{ x.category_name }}">
+            </div>
+
+            <div class="f-group">
+                <label class="f-label">Description</label>
+                <textarea name="t2" class="f-ctrl">{{ x.description }}</textarea>
+            </div>
+
+            <div class="f-group">
+                <label class="f-label">Parent Category</label>
+                <input type="text" name="t3" class="f-ctrl" value="{{ x.parent_category }}">
+            </div>
+
+            <button type="submit" class="btn-y">
+                Update Category
+            </button>
+
+            <a href="/viewmaterialcategory/" class="btn-o">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

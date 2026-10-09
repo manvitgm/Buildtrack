@@ -1,0 +1,1302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- SEO Meta Tags -->
+<title>BuildTrack - Smart Construction Material Management System</title>
+<meta name="description" content="BuildTrack is a premium enterprise-grade material management platform for construction companies. Track live inventory, manage suppliers, schedule deliveries, and record payments.">
+<meta name="keywords" content="construction inventory, material management, civil engineering software, supplier tracking, cement order, steel supply tracker">
+<meta name="author" content="BuildTrack Systems">
+
+<!-- OpenGraph / Social Meta Tags -->
+<meta property="og:title" content="BuildTrack - Enterprise Construction Material Management">
+<meta property="og:description" content="Streamline logistics, inventory, and supplier payments in real-time with BuildTrack's intuitive dashboard.">
+<meta property="og:type" content="website">
+
+<!-- Premium Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<style>
+/* CSS RESET & MODERN DESIGN SYSTEM SYSTEM TOKENS */
+:root {
+    --bg-dark: #07070a;
+    --bg-card: rgba(20, 20, 25, 0.6);
+    --bg-card-hover: rgba(30, 30, 38, 0.85);
+    --accent: #ffd700; /* Rich gold-yellow */
+    --accent-glow: rgba(255, 215, 0, 0.25);
+    --primary-gradient: linear-gradient(135deg, #7b2fff, #c084fc);
+    --gold-gradient: linear-gradient(135deg, #ffd700, #ff9900);
+    --card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    --white: #ffffff;
+    --text-muted: #9fa0a6;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-glow: rgba(255, 255, 255, 0.15);
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--white);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* DYNAMIC BACKGROUND BLOBS */
+.blob-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.15;
+    animation: float-slow 20s infinite ease-in-out alternate;
+}
+
+.blob-1 {
+    width: 500px;
+    height: 500px;
+    background: #7b2fff;
+    top: -100px;
+    right: -100px;
+}
+
+.blob-2 {
+    width: 450px;
+    height: 450px;
+    background: var(--accent);
+    top: 40%;
+    left: -150px;
+    animation-delay: -5s;
+}
+
+.blob-3 {
+    width: 600px;
+    height: 600px;
+    background: #00f2fe;
+    bottom: -150px;
+    right: 15%;
+    animation-delay: -10s;
+}
+
+/* MESH GRID OVERLAY */
+.mesh-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.007) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.007) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes float-slow {
+    0% { transform: translateY(0) scale(1) rotate(0deg); }
+    100% { transform: translateY(50px) scale(1.15) rotate(15deg); }
+}
+
+/* GLASSMORPHIC CONTAINER */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 10;
+}
+
+/* FLOATING HEADER NAVBAR */
+.navbar {
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(7, 7, 10, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.logo-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--gold-gradient);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    box-shadow: 0 0 20px var(--accent-glow);
+    animation: pulse 3s infinite;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+.nav-links a:hover {
+    color: var(--accent);
+}
+
+.login-btn {
+    background: var(--gold-gradient);
+    color: #000 !important;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(255, 215, 0, 0.5);
+}
+
+/* HERO SECTION */
+.hero {
+    min-height: 85vh;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    padding: 80px 0;
+    gap: 60px;
+}
+
+.hero-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.announcement-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    margin-bottom: 24px;
+    text-transform: uppercase;
+}
+
+.announcement-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00ff66;
+    box-shadow: 0 0 10px #00ff66;
+    animation: flash 1.5s infinite alternate;
+}
+
+.hero-info h1 {
+    font-family: var(--font-heading);
+    font-size: 4.8rem;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+}
+
+.hero-info h1 span {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-info p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    max-width: 540px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.hero-btn {
+    text-decoration: none;
+    padding: 16px 32px;
+    border-radius: 14px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.primary-btn {
+    background: var(--gold-gradient);
+    color: #000;
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.2);
+}
+
+.primary-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.35);
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    color: var(--white);
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--border-glow);
+    transform: translateY(-2px);
+}
+
+/* MULTI-LAYER HERO DASHBOARD MOCKUP */
+.hero-mockup {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mockup-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 32px;
+    width: 100%;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+    z-index: 5;
+    background-image: var(--card-gradient);
+}
+
+.mockup-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 75% 20%, rgba(123, 47, 255, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.mockup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+}
+
+.mockup-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.dot-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dot-red { background: #ff5f56; }
+.dot-yellow { background: #ffbd2e; }
+.dot-green { background: #27c93f; }
+
+.mockup-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* REAL-TIME DYNAMIC METRICS */
+.stats-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    background: var(--accent);
+    color: #000;
+}
+
+.stat-number {
+    font-family: var(--font-heading);
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* INTERACTIVE PREVIEW: FEATURED MATERIALS IN DB */
+.featured-catalog {
+    padding: 100px 0;
+    border-top: 1px solid var(--border);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 48px;
+}
+
+.section-label {
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.section-label span {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.section-intro {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.material-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    background-image: var(--card-gradient);
+}
+
+.material-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--border-glow);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 215, 0, 0.05);
+}
+
+.mat-img-container {
+    height: 220px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.mat-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.material-card:hover .mat-img {
+    transform: scale(1.06);
+}
+
+.category-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(7, 7, 10, 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mat-content {
+    padding: 24px;
+}
+
+.mat-title {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.supplier-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 12px;
+}
+
+.supplier-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.supplier-name i {
+    color: var(--accent);
+    margin-right: 4px;
+}
+
+.rating-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(255, 215, 0, 0.08);
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+}
+
+.price-val {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--white);
+}
+
+.price-unit {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.order-action-btn {
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.order-action-btn:hover {
+    background: var(--gold-gradient);
+    color: #000;
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.25);
+}
+
+/* PLATFORM FEATURES GRID */
+.features-section {
+    padding: 80px 0;
+    border-top: 1px solid var(--border);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.feature-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px 30px;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    overflow: hidden;
+    background-image: var(--card-gradient);
+}
+
+.feature-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--border-glow);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: rgba(255, 215, 0, 0.08);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon-container {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.feature-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.feature-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* ABOUT SECTION */
+.about-section {
+    padding: 80px 0;
+    border-top: 1px solid var(--border);
+}
+
+.about-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.about-content h2 {
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+}
+
+.about-content h2 span {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.about-content p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+.about-badges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 36px;
+}
+
+.about-badge-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    border-radius: 14px;
+}
+
+.about-badge-item i {
+    font-size: 1.4rem;
+    color: var(--accent);
+}
+
+.about-badge-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.architecture-graphic {
+    background: rgba(20, 20, 25, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.arch-node {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    padding: 16px 24px;
+    border-radius: 16px;
+    position: relative;
+    z-index: 2;
+}
+
+.arch-node-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 1.2rem;
+}
+
+.arch-node-info h4 {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.arch-node-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.arch-line {
+    width: 2px;
+    height: 24px;
+    background: linear-gradient(180deg, var(--accent) 0%, transparent 100%);
+    margin-left: 45px;
+    opacity: 0.4;
+}
+
+/* PREMIUM FOOTER */
+.footer {
+    border-top: 1px solid var(--border);
+    background: #040406;
+    padding: 60px 0 40px 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--white);
+}
+
+.footer-nav {
+    display: flex;
+    gap: 24px;
+}
+
+.footer-nav a {
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: color 0.25s ease;
+}
+
+.footer-nav a:hover {
+    color: var(--accent);
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.social-links {
+    display: flex;
+    gap: 16px;
+}
+
+.social-links a {
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    transition: color 0.2s ease;
+}
+
+.social-links a:hover {
+    color: var(--accent);
+}
+
+/* ANIMATION KEYFRAMES */
+@keyframes pulse {
+    0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.45); }
+    100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+}
+
+@keyframes flash {
+    0% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+/* RESPONSIVE LAYOUT STYLES */
+@media(max-width: 991px) {
+    .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 50px 0;
+        gap: 50px;
+    }
+    .hero-info {
+        align-items: center;
+    }
+    .hero-info h1 {
+        font-size: 3.6rem;
+    }
+    .about-layout {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+}
+
+@media(max-width: 768px) {
+    .navbar-container {
+        padding: 16px;
+    }
+    .nav-links {
+        display: none; /* Mobile menu can be triggered or default to login */
+    }
+    .hero-info h1 {
+        font-size: 2.8rem;
+    }
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .footer-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .footer-bottom {
+        flex-direction: column-reverse;
+        align-items: flex-start;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- DYNAMIC BACKGROUND & GRID BLOCKS -->
+<div class="blob-container">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+<div class="mesh-grid"></div>
+
+<!-- HEADER NAVBAR -->
+<header class="navbar" id="app-navbar">
+    <div class="navbar-container">
+        <a href="/" class="logo" id="nav-logo">
+            <div class="logo-circle">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            BUILDTRACK
+        </a>
+        <nav class="nav-links" id="nav-links-container">
+            <a href="#catalog" id="link-catalog">Material Catalog</a>
+            <a href="#features" id="link-features">Features</a>
+            <a href="#about" id="link-about">Architecture</a>
+            <a href="/insertlogin/" class="login-btn" id="link-login">
+                Access Dashboard
+            </a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="hero-section">
+        
+        <div class="hero-info">
+            <div class="announcement-pill" id="ann-pill">
+                <span class="announcement-dot"></span>
+                Real-Time Construction Analytics Enabled
+            </div>
+            <h1 id="hero-headline">
+                Smarter Materials.<br>
+                <span>Faster Execution.</span>
+            </h1>
+            <p id="hero-subtext">
+                BuildTrack orchestrates construction material tracking, supplier relations, expected deliveries, automated invoicing, and secure payment logs under a singular, high-performance portal.
+            </p>
+            <div class="hero-buttons" id="hero-btns-group">
+                <a href="/insertlogin/" class="hero-btn primary-btn" id="hero-btn-dashboard">
+                    Access Dashboard
+                </a>
+                <a href="#catalog" class="hero-btn secondary-btn" id="hero-btn-catalog">
+                    Explore Catalog
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-mockup" id="dashboard-mockup">
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <div class="mockup-dots">
+                        <span class="dot-icon dot-red"></span>
+                        <span class="dot-icon dot-yellow"></span>
+                        <span class="dot-icon dot-green"></span>
+                    </div>
+                    <div class="mockup-title">BuildTrack Analytics Control</div>
+                    <span class="rating-badge"><i class="bi bi-lightning-fill"></i> Live</span>
+                </div>
+                
+                <!-- dynamic metrics counts fetched from database models -->
+                <div class="stats-container" id="analytics-stats-grid">
+                    
+                    <div class="stat-card" id="stat-materials">
+                        <div class="stat-icon"><i class="bi bi-boxes"></i></div>
+                        <div>
+                            <div class="stat-number">{{ total_materials|default:"20" }}</div>
+                            <div class="stat-label">Active Materials</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="stat-suppliers">
+                        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                        <div>
+                            <div class="stat-number">{{ total_suppliers|default:"12" }}</div>
+                            <div class="stat-label">Verified Suppliers</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="stat-orders">
+                        <div class="stat-icon"><i class="bi bi-file-earmark-spreadsheet-fill"></i></div>
+                        <div>
+                            <div class="stat-number">{{ total_orders|default:"0" }}</div>
+                            <div class="stat-label">Placed Orders</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="stat-sites">
+                        <div class="stat-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div>
+                            <div class="stat-number">{{ total_sites|default:"4" }}</div>
+                            <div class="stat-label">Project Sites</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- LIVE CATALOG PREVIEW -->
+    <section class="featured-catalog" id="catalog">
+        
+        <div class="section-header">
+            <div>
+                <h2 class="section-label">
+                    Live <span>Material catalog</span>
+                </h2>
+                <p class="section-intro">
+                    Direct access to premium verified building materials, complete with high-resolution photos and transparent supplier ratings.
+                </p>
+            </div>
+            <a href="/insertlogin/" class="hero-btn secondary-btn" style="padding: 12px 24px; font-size: 0.9rem;" id="catalog-view-all">
+                View Full Catalog ({{ total_materials|default:"20" }}) <i class="bi bi-arrow-right" style="margin-left: 6px;"></i>
+            </a>
+        </div>
+
+        <div class="catalog-grid" id="featured-materials-list">
+            
+            {% if featured_materials %}
+                {% for mat in featured_materials %}
+                    <div class="material-card" id="feat-mat-{{ mat.id }}">
+                        <div class="mat-img-container">
+                            {% if mat.photo %}
+                                <img src="{{ mat.photo.url }}" alt="{{ mat.material_name }}" class="mat-img">
+                            {% else %}
+                                <img src="/static/images/placeholder.png" alt="No photo available" class="mat-img">
+                            {% endif %}
+                            <span class="category-badge">{{ mat.category.category_name }}</span>
+                        </div>
+                        <div class="mat-content">
+                            <h3 class="mat-title">{{ mat.material_name }}</h3>
+                            <div class="supplier-row">
+                                <span class="supplier-name" title="{{ mat.supplier.company_name }}"><i class="bi bi-patch-check-fill"></i> {{ mat.supplier.company_name }}</span>
+                                <span class="rating-badge">
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    {{ mat.supplier.rating|default:"5.0" }}
+                                </span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-val">₹{{ mat.price|floatformat:0 }}<span class="price-unit">/{{ mat.unit }}</span></span>
+                                <a href="/insertlogin/" class="order-action-btn" id="order-btn-{{ mat.id }}">
+                                    <i class="bi bi-cart-plus"></i> Buy
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback premium styled cards if DB is empty -->
+                <div class="material-card" id="feat-mat-fb1">
+                    <div class="mat-img-container">
+                        <img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&q=80" alt="Cement" class="mat-img">
+                        <span class="category-badge">Cement</span>
+                    </div>
+                    <div class="mat-content">
+                        <h3 class="mat-title">UltraTech Cement OPC 53</h3>
+                        <div class="supplier-row">
+                            <span class="supplier-name"><i class="bi bi-patch-check-fill"></i> UltraTech Cement Ltd.</span>
+                            <span class="rating-badge"><i class="bi bi-star-fill"></i> 5.0</span>
+                        </div>
+                        <div class="price-row">
+                            <span class="price-val">₹420<span class="price-unit">/bag</span></span>
+                            <a href="/insertlogin/" class="order-action-btn" id="order-btn-fb1">
+                                <i class="bi bi-cart-plus"></i> Buy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="material-card" id="feat-mat-fb2">
+                    <div class="mat-img-container">
+                        <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=600&q=80" alt="Steel" class="mat-img">
+                        <span class="category-badge">Steel</span>
+                    </div>
+                    <div class="mat-content">
+                        <h3 class="mat-title">Fe-500D TMT Steel Rods (12mm)</h3>
+                        <div class="supplier-row">
+                            <span class="supplier-name"><i class="bi bi-patch-check-fill"></i> SteelCore Industries</span>
+                            <span class="rating-badge"><i class="bi bi-star-fill"></i> 4.5</span>
+                        </div>
+                        <div class="price-row">
+                            <span class="price-val">₹62,000<span class="price-unit">/ton</span></span>
+                            <a href="/insertlogin/" class="order-action-btn" id="order-btn-fb2">
+                                <i class="bi bi-cart-plus"></i> Buy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="material-card" id="feat-mat-fb3">
+                    <div class="mat-img-container">
+                        <img src="https://images.unsplash.com/photo-1590069261209-f8e9b8642343?w=600&q=80" alt="Bricks" class="mat-img">
+                        <span class="category-badge">Masonry</span>
+                    </div>
+                    <div class="mat-content">
+                        <h3 class="mat-title">Premium Clay Red Bricks</h3>
+                        <div class="supplier-row">
+                            <span class="supplier-name"><i class="bi bi-patch-check-fill"></i> BrickZone Traders</span>
+                            <span class="rating-badge"><i class="bi bi-star-fill"></i> 4.8</span>
+                        </div>
+                        <div class="price-row">
+                            <span class="price-val">₹8<span class="price-unit">/piece</span></span>
+                            <a href="/insertlogin/" class="order-action-btn" id="order-btn-fb3">
+                                <i class="bi bi-cart-plus"></i> Buy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </section>
+
+    <!-- CORE FEATURES SECTION -->
+    <section class="features-section" id="features">
+        
+        <div class="section-header">
+            <div>
+                <h2 class="section-label">
+                    Engineered for <span>Scale</span>
+                </h2>
+                <p class="section-intro">
+                    Experience state-of-the-art logistics and planning capabilities built directly into one central ERP portal.
+                </p>
+            </div>
+        </div>
+
+        <div class="features-grid" id="features-cards-grid">
+            
+            <div class="feature-card" id="feat-inventory">
+                <div class="feature-icon-container">
+                    <i class="bi bi-box-seam-fill"></i>
+                </div>
+                <h3>Real-time Inventory</h3>
+                <p>Track quantities, dynamic threshold alerts, consumption trends, and multi-site inventory transfers seamlessly.</p>
+            </div>
+
+            <div class="feature-card" id="feat-suppliers">
+                <div class="feature-icon-container">
+                    <i class="bi bi-building-fill-check"></i>
+                </div>
+                <h3>Supplier Matrix</h3>
+                <p>Register verified suppliers, evaluate live feedback, rate performance, and organize legal GST records.</p>
+            </div>
+
+            <div class="feature-card" id="feat-deliveries">
+                <div class="feature-icon-container">
+                    <i class="bi bi-truck-flatbed"></i>
+                </div>
+                <h3>Logistics Control</h3>
+                <p>Monitor dispatch schedules, expected delivery dates, site manager digital signatures, and cargo status.</p>
+            </div>
+
+            <div class="feature-card" id="feat-payments">
+                <div class="feature-icon-container">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <h3>Automated Finance</h3>
+                <p>Process Razorpay integrations, standard bank transactions, and cash-on-delivery tracking logs instantly.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ABOUT / ARCHITECTURE SECTION -->
+    <section class="about-section" id="about">
+        
+        <div class="about-layout" id="about-content-layout">
+            
+            <div class="about-content">
+                <h2>Unified <span>Supply Chain</span> Coordination</h2>
+                <p>
+                    BuildTrack delivers a unified portal that connects administrators, project site managers, and certified suppliers directly. By automating stock calculations and order placement pipelines, we eliminate processing lag, prevent raw material supply bottlenecks, and boost project delivery speed.
+                </p>
+                <p>
+                    From foundations to finishings, verify material quality statuses, audit payments, and coordinate delivery notes with photographic proof.
+                </p>
+                
+                <div class="about-badges" id="about-badges-group">
+                    <div class="about-badge-item" id="badge-precision">
+                        <i class="bi bi-bullseye"></i>
+                        <span class="about-badge-text">99.8% Tracking Accuracy</span>
+                    </div>
+                    <div class="about-badge-item" id="badge-encryption">
+                        <i class="bi bi-shield-fill-lock"></i>
+                        <span class="about-badge-text">Secure Data Protocols</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="architecture-graphic" id="architecture-flow-graphic">
+                <div class="mockup-title" style="margin-bottom: 10px;">Platform System Topology</div>
+                
+                <div class="arch-node" id="node-suppliers">
+                    <div class="arch-node-icon"><i class="bi bi-building"></i></div>
+                    <div class="arch-node-info">
+                        <h4>1. Suppliers & Logistics</h4>
+                        <p>Upload digital stock catalogs, process bids, and dispatch shipments.</p>
+                    </div>
+                </div>
+
+                <div class="arch-line"></div>
+
+                <div class="arch-node" id="node-hq">
+                    <div class="arch-node-icon"><i class="bi bi-gear-fill"></i></div>
+                    <div class="arch-node-info">
+                        <h4>2. BuildTrack Orchestration Engine</h4>
+                        <p>Evaluate inventory trends, manage dynamic orders, and audit transactions.</p>
+                    </div>
+                </div>
+
+                <div class="arch-line"></div>
+
+                <div class="arch-node" id="node-sites">
+                    <div class="arch-node-icon"><i class="bi bi-geo-alt"></i></div>
+                    <div class="arch-node-info">
+                        <h4>3. Project Construction Sites</h4>
+                        <p>Monitor available stock, request materials, and sign off on deliveries.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer" id="app-footer">
+    <div class="container">
+        
+        <div class="footer-top">
+            <div class="footer-logo">
+                <div class="logo-circle" style="width: 32px; height: 32px; font-size: 1rem;">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                BUILDTRACK
+            </div>
+            <div class="footer-nav" id="footer-nav-links">
+                <a href="#catalog">Catalog</a>
+                <a href="#features">Features</a>
+                <a href="#about">Architecture</a>
+                <a href="/insertlogin/">Access Dashboard</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div id="footer-copyright">
+                &copy; 2026 BuildTrack Inc. Engineered for absolute construction operations precision.
+            </div>
+            <div class="social-links" id="footer-social-icons">
+                <a href="#" aria-label="LinkedIn Profile"><i class="bi bi-linkedin"></i></a>
+                <a href="#" aria-label="GitHub Repository"><i class="bi bi-github"></i></a>
+                <a href="#" aria-label="Twitter Profile"><i class="bi bi-twitter-x"></i></a>
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}New Order{% endblock %}
+{% block page_title %}Material Orders{% endblock %}
+{% block nav_ord %}active{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar">
+    <a href="/viewmaterialorder/">Orders</a>
+    <span class="sep">/</span>
+    <span class="cur">New Order</span>
+</div>
+
+<div class="row g-3">
+
+    <!-- LEFT -->
+    <div class="col-lg-8">
+
+        <div class="card fu">
+
+            <div class="card-head">
+                <h5>
+                    <i class="bi bi-cart3 me-2" style="color:var(--accent)"></i>
+                    Order Details
+                </h5>
+            </div>
+
+            <div class="card-body-pad">
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+
+                        <!-- Project -->
+                        <div class="col-md-6">
+                            <label class="f-label">Project Site *</label>
+
+                            <select class="f-ctrl" name="project_site" required>
+
+                                <option value="">Select Project</option>
+
+                                {% for p in projects %}
+
+                                <option value="{{ p.id }}">
+                                    {{ p.site_name }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+                        <!-- Supplier -->
+                        <div class="col-md-6">
+
+                            <label class="f-label">Supplier *</label>
+
+                            <select class="f-ctrl" name="supplier" required>
+
+                                <option value="">Select Supplier</option>
+
+                                {% for s in suppliers %}
+
+                                <option value="{{ s.id }}">
+                                    {{ s.company_name }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <!-- Ordered By -->
+                        <div class="col-md-6">
+
+                            <label class="f-label">Ordered By</label>
+
+                            <select class="f-ctrl" name="ordered_by">
+
+                                <option value="">Select User</option>
+
+                                {% for u in users %}
+
+                                <option value="{{ u.id }}">
+                                    {{ u.name }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6">
+
+                            <label class="f-label">Status</label>
+
+                            <select class="f-ctrl" name="status">
+
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- Order Date -->
+                        <div class="col-md-6">
+
+                            <label class="f-label">Order Date *</label>
+
+                            <input
+                                type="date"
+                                name="order_date"
+                                class="f-ctrl"
+                                required
+                            >
+
+                        </div>
+
+                        <!-- Delivery -->
+                        <div class="col-md-6">
+
+                            <label class="f-label">
+                                Expected Delivery Date
+                            </label>
+
+                            <input
+                                type="date"
+                                name="expected_delivery_date"
+                                class="f-ctrl"
+                            >
+
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="col-md-6">
+
+                            <label class="f-label">
+                                Total Amount (₹)
+                            </label>
+
+                            <input
+                                type="number"
+                                step="0.01"
+                                name="total_amount"
+                                id="totalAmt"
+                                class="f-ctrl"
+                                placeholder="0.00"
+                                value="0"
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <hr class="divider">
+
+                    <div class="d-flex gap-2">
+
+                        <button type="submit" class="btn-y">
+                            <i class="bi bi-check-lg"></i>
+                            Create Order
+                        </button>
+
+                        <a href="/viewmaterialorder/" class="btn-o">
+                            <i class="bi bi-x"></i>
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-4">
+
+        <div class="card fu">
+
+            <div class="card-head">
+                <h5>
+                    <i class="bi bi-receipt me-2" style="color:var(--accent-g)"></i>
+                    Order Summary
+                </h5>
+            </div>
+
+            <div class="card-body-pad">
+
+                <div style="text-align:center;padding:1.2rem 0;">
+
+                    <div style="font-size:.7rem;color:#52525b;text-transform:uppercase;letter-spacing:2px;margin-bottom:.4rem;">
+                        Total Amount
+                    </div>
+
+                    <div
+                        id="summaryAmt"
+                        style="font-family:'Barlow Condensed',sans-serif;font-size:2.5rem;font-weight:800;color:var(--accent);"
+                    >
+                        ₹0.00
+                    </div>
+
+                </div>
+
+                <hr class="divider">
+
+                <div style="font-size:.8rem;color:#52525b;line-height:1.9;">
+
+                    After saving this order, go to
+                    <strong style="color:var(--muted);">
+                        Order Items
+                    </strong>
+                    and add materials.
+
+                </div>
+
+                <a
+                    href="/insertorderitem/"
+                    class="btn-b"
+                    style="width:100%;justify-content:center;margin-top:1rem;"
+                >
+                    <i class="bi bi-plus"></i>
+                    Add Order Items
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+const amtInput = document.getElementById("totalAmt");
+const summaryAmt = document.getElementById("summaryAmt");
+
+amtInput.addEventListener("input", function(){
+
+    let value = parseFloat(this.value) || 0;
+
+    summaryAmt.innerHTML =
+        "₹" + value.toLocaleString('en-IN', {
+            minimumFractionDigits:2
+        });
+
+});
+
+</script>
+
+{% endblock %}

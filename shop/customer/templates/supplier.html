@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Add Supplier{% endblock %}
+{% block page_title %}Add Supplier{% endblock %}
+{% block nav_sup %}active{% endblock %}
+{% block content %}
+<div class="breadcrumb-bar mb-3">
+  <a href="/viewsupplier/" style="color:var(--text);text-decoration:none;">Suppliers</a> <span class="sep" style="color:var(--muted);margin:0 .5rem;">/</span> <span class="cur" style="color:var(--accent);">Add New</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card fu">
+      <div class="card-head">
+        <h5><i class="bi bi-building me-2" style="color:var(--accent)"></i>Supplier Information</h5>
+      </div>
+      <div class="card-body-pad">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="f-group">
+                <label class="f-label">Company Name *</label>
+                <input class="f-ctrl" type="text" name="company_name" placeholder="e.g. UltraTech Cement Ltd." required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="f-group">
+                <label class="f-label">User / Owner Name</label>
+                <input class="f-ctrl" type="text" name="user" placeholder="Contact person name">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="f-group">
+                <label class="f-label">GST Number</label>
+                <input class="f-ctrl" type="text" name="gst_number" placeholder="22AAAAA0000A1Z5" maxlength="15">
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="f-group">
+                <label class="f-label">Specialization</label>
+                <input class="f-ctrl" type="text" name="specialization" placeholder="e.g. Cement, Steel, Electrical, Plumbing">
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="f-group">
+                <label class="f-label">Warehouse Address</label>
+                <textarea class="f-ctrl" name="warehouse_address" rows="3" placeholder="Full warehouse / godown address"></textarea>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="f-group">
+                <label class="f-label">Rating (1–5)</label>
+                <input class="f-ctrl" type="number" name="rating" min="1" max="5" value="3" placeholder="3">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="f-group">
+                <label class="f-label">Company Logo</label>
+                <input class="f-ctrl" type="file" name="logo" accept="image/*" style="padding:.4rem .85rem;">
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-y"><i class="bi bi-check-lg"></i> Save Supplier</button>
+            <a href="/show-suppliers/" class="btn-o"><i class="bi bi-x"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips panel -->
+  <div class="col-lg-5">
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head"><h5><i class="bi bi-info-circle me-2" style="color:var(--accent-b)"></i>Guidelines</h5></div>
+      <div class="card-body-pad">
+        {% for icon, tip in tips %}{% endfor %}
+        <div style="display:flex;flex-direction:column;gap:.85rem;">
+          <div style="display:flex;gap:.75rem;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:rgba(245,158,11,.1);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-shield-check" style="color:var(--accent);font-size:.85rem;"></i></div>
+            <div><div style="font-size:.84rem;font-weight:600;">GST Verification</div><div style="font-size:.78rem;color:#52525b;margin-top:.15rem;">Enter the 15-digit GST number as registered. This is used for invoice verification.</div></div>
+          </div>
+          <div style="display:flex;gap:.75rem;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:rgba(59,130,246,.1);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-star" style="color:var(--accent-b);font-size:.85rem;"></i></div>
+            <div><div style="font-size:.84rem;font-weight:600;">Rating</div><div style="font-size:.78rem;color:#52525b;margin-top:.15rem;">Initial rating can be updated after the first delivery or order is completed.</div></div>
+          </div>
+          <div style="display:flex;gap:.75rem;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:rgba(16,185,129,.1);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-image" style="color:var(--accent-g);font-size:.85rem;"></i></div>
+            <div><div style="font-size:.84rem;font-weight:600;">Logo</div><div style="font-size:.78rem;color:#52525b;margin-top:.15rem;">Upload a square logo (PNG/JPG). Max 2MB. Will be displayed on supplier cards.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

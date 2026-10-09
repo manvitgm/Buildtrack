@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Add Category{% endblock %}
+{% block page_title %}Material Categories{% endblock %}
+{% block nav_cat %}active{% endblock %}
+{% block content %}
+<div class="breadcrumb-bar">
+  <a href="/viewmaterialcategory/">Categories</a><span class="sep">/</span><span class="cur">Add New</span>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card fu">
+      <div class="card-head">
+        <h5><i class="bi bi-tags me-2" style="color:var(--accent)"></i>New Category</h5>
+      </div>
+      <div class="card-body-pad">
+        <form method="post">{% csrf_token %}
+          <div class="f-group">
+            <label class="f-label">Category Name *</label>
+            <input class="f-ctrl" type="text" name="category_name" placeholder="e.g. Structural Materials" required>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Description</label>
+            <textarea class="f-ctrl" name="description" rows="3" placeholder="Brief description of what this category covers…"></textarea>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Parent Category (optional)</label>
+            <select class="f-ctrl" name="parent_category">
+              <option value="">— None (Top-level) —</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.category_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <hr class="divider">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-y"><i class="bi bi-check-lg"></i> Save Category</button>
+            <a href="/viewmaterialcategory/" class="btn-o"><i class="bi bi-x"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head"><h5><i class="bi bi-diagram-3 me-2" style="color:var(--accent-b)"></i>Category Hierarchy</h5></div>
+      <div class="card-body-pad">
+        {% for cat in categories %}
+        <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:7px;margin-bottom:.25rem;{% if cat.parent_category %}padding-left:1.8rem;{% endif %}">
+          <i class="bi bi-folder{% if not cat.parent_category %}-fill{% endif %}" style="color:{% if cat.parent_category %}#52525b{% else %}var(--accent){% endif %};font-size:.88rem;"></i>
+          <span style="font-size:.86rem;{% if cat.parent_category %}color:var(--muted);{% endif %}">{{ cat.category_name }}</span>
+        </div>
+        {% empty %}
+        <div class="empty" style="padding:1.5rem;font-size:.84rem;">No categories yet</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

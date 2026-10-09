@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Submit Review{% endblock %}
+{% block page_title %}Submit Review{% endblock %}
+{% block nav_rev %}active{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+  <a href="/viewreview/">Reviews</a><span class="sep">/</span><span class="cur">Write a Review</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card fu">
+      <div class="card-head">
+        <h5><i class="bi bi-star-fill me-2" style="color:var(--accent)"></i>Write a Review</h5>
+      </div>
+      <div class="card-body-pad">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            
+            <div class="col-md-6">
+              <label class="f-label">Supplier *</label>
+              <select class="f-ctrl" name="supplier" required>
+                <option value="">— Select Supplier —</option>
+                {% for s in suppliers %}
+                <option value="{{ s.id }}">{{ s.company_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="f-label">Material *</label>
+              <select class="f-ctrl" name="material" required>
+                <option value="">— Select Material —</option>
+                {% for m in materials %}
+                <option value="{{ m.id }}">{{ m.material_name }} ({{ m.supplier.company_name }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="col-md-12">
+              <label class="f-label">Rating *</label>
+              <div style="display:flex;gap:1rem;background:var(--bg);padding:.8rem;border-radius:8px;border:1px solid var(--border);">
+                <label style="cursor:pointer;display:flex;align-items:center;gap:.3rem;"><input type="radio" name="rating" value="5" checked> ⭐⭐⭐⭐⭐ (5)</label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:.3rem;"><input type="radio" name="rating" value="4"> ⭐⭐⭐⭐ (4)</label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:.3rem;"><input type="radio" name="rating" value="3"> ⭐⭐⭐ (3)</label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:.3rem;"><input type="radio" name="rating" value="2"> ⭐⭐ (2)</label>
+                <label style="cursor:pointer;display:flex;align-items:center;gap:.3rem;"><input type="radio" name="rating" value="1"> ⭐ (1)</label>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <label class="f-label">Comments</label>
+              <textarea class="f-ctrl" name="comments" rows="4" placeholder="How was the quality of the material and the service of the supplier?"></textarea>
+            </div>
+            
+          </div>
+          <hr class="divider">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-y"><i class="bi bi-send"></i> Submit Review</button>
+            <a href="/viewreview/" class="btn-o"><i class="bi bi-x"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head"><h5><i class="bi bi-shield-check me-2" style="color:var(--accent-g)"></i>Review Guidelines</h5></div>
+      <div class="card-body-pad">
+        <ul style="color:var(--dim);font-size:.85rem;line-height:1.7;padding-left:1rem;">
+          <li>Your review will be visible to all staff members and administrators.</li>
+          <li>Please be objective and constructive in your feedback.</li>
+          <li>Mention both the material quality and the supplier's delivery timeliness.</li>
+          <li>Inappropriate language will result in the review being deleted.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

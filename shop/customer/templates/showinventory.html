@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% block title %}Inventory{% endblock %}
+{% block page_title %}Inventory{% endblock %}
+{% block nav_inv %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+
+/* ====== INVENTORY PAGE ====== */
+
+.inv-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.5rem;
+}
+@media(max-width:900px){.inv-stats{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.inv-stats{grid-template-columns:1fr;}}
+
+.inv-stat{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+  padding:1.2rem 1.4rem;position:relative;overflow:hidden;transition:.2s;
+}
+.inv-stat:hover{border-color:rgba(245,158,11,.3);}
+.inv-stat .icon{
+  position:absolute;top:12px;right:14px;font-size:1.5rem;opacity:.15;
+}
+.inv-stat .label{
+  font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.4rem;
+}
+.inv-stat .value{
+  font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;
+}
+.inv-stat.green .value{color:var(--accent-g);}
+.inv-stat.amber .value{color:var(--accent);}
+.inv-stat.red .value{color:var(--accent-r);}
+.inv-stat.blue .value{color:var(--accent-b);}
+
+/* Auto-update badge */
+.auto-badge{
+  display:inline-flex;align-items:center;gap:.35rem;
+  padding:.3rem .7rem;border-radius:20px;
+  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);
+  color:#34d399;font-size:.7rem;font-weight:600;
+}
+
+/* Table enhancements */
+.inv-tbl{width:100%;border-collapse:collapse;}
+.inv-tbl thead th{
+  padding:.7rem 1rem;border-bottom:1px solid var(--border);
+  font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:left;
+}
+.inv-tbl td{padding:.75rem 1rem;font-size:.87rem;border-bottom:1px solid rgba(31,31,40,.5);}
+.inv-tbl tbody tr{transition:.15s;}
+.inv-tbl tbody tr:hover{background:var(--bg-hover);}
+
+.stock-bar{
+  width:100%;height:6px;background:var(--border);border-radius:10px;overflow:hidden;margin-top:.3rem;
+}
+.stock-fill{height:100%;border-radius:10px;transition:width .4s;}
+
+.inv-badge{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.25rem .6rem;border-radius:16px;font-size:.7rem;font-weight:700;letter-spacing:.3px;
+}
+.inv-badge.available{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.2);}
+.inv-badge.low{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.2);}
+.inv-badge.out{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+
+.mat-chip{
+  display:inline-flex;align-items:center;gap:.4rem;
+}
+.mat-chip img{width:32px;height:32px;border-radius:6px;object-fit:cover;}
+.mat-chip .placeholder{width:32px;height:32px;border-radius:6px;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--muted);}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <div>
+    <h4 style="font-weight:700;display:flex;align-items:center;gap:.5rem;">
+      <i class="bi bi-archive" style="color:var(--accent)"></i> Inventory
+      <span class="auto-badge"><i class="bi bi-lightning-charge-fill"></i> Auto-Updated</span>
+    </h4>
+    <p style="color:var(--muted);font-size:.82rem;margin-top:.2rem;">
+      Inventory syncs automatically when orders are placed, delivered, or cancelled.
+    </p>
+  </div>
+  <a href="/insertinventory/" class="btn-y">
+    <i class="bi bi-plus-lg"></i> Add Inventory
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="inv-stats">
+  <div class="inv-stat blue">
+    <i class="bi bi-boxes icon"></i>
+    <div class="label">Total Records</div>
+    <div class="value">{{ total_items }}</div>
+  </div>
+  <div class="inv-stat green">
+    <i class="bi bi-check-circle icon"></i>
+    <div class="label">Total Available Stock</div>
+    <div class="value">{{ total_available }}</div>
+  </div>
+  <div class="inv-stat amber">
+    <i class="bi bi-exclamation-triangle icon"></i>
+    <div class="label">Low Stock (≤10)</div>
+    <div class="value">{{ low_stock }}</div>
+  </div>
+  <div class="inv-stat red">
+    <i class="bi bi-x-circle icon"></i>
+    <div class="label">Out of Stock</div>
+    <div class="value">{{ out_of_stock }}</div>
+  </div>
+</div>
+
+<!-- Inventory Table -->
+<div class="card fu">
+  <div class="card-head">
+    <h5><i class="bi bi-table me-2" style="color:var(--accent-b)"></i> Inventory Records</h5>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="inv-tbl">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Material</th>
+          <th>Project Site</th>
+          <th>Available</th>
+          <th>Used</th>
+          <th>Stock Level</th>
+          <th>Status</th>
+          <th>Last Updated</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in data %}
+        <tr>
+          <td style="color:var(--muted);font-size:.8rem;">#{{ i.id }}</td>
+
+          <td>
+            <div class="mat-chip">
+              {% if i.material.photo %}
+                <img src="{{ i.material.photo.url }}" alt="{{ i.material.material_name }}">
+              {% else %}
+                <div class="placeholder"><i class="bi bi-box-seam"></i></div>
+              {% endif %}
+              <div>
+                <div style="font-weight:600;font-size:.85rem;">{{ i.material.material_name }}</div>
+                <div style="font-size:.7rem;color:var(--muted);">{{ i.material.material_code|default:"—" }} · ₹{{ i.material.price }}/{{ i.material.unit }}</div>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <div style="font-weight:600;font-size:.85rem;">{{ i.project_site.site_name }}</div>
+            <div style="font-size:.7rem;color:var(--muted);">{{ i.project_site.location|default:"" }}</div>
+          </td>
+
+          <td>
+            <span style="font-weight:700;font-size:1rem;
+              {% if i.available_quantity > 50 %}color:var(--accent-g);
+              {% elif i.available_quantity > 10 %}color:var(--accent);
+              {% elif i.available_quantity > 0 %}color:#fbbf24;
+              {% else %}color:var(--accent-r);{% endif %}
+            ">{{ i.available_quantity }}</span>
+            <span style="font-size:.75rem;color:var(--muted);"> {{ i.material.unit }}</span>
+            <div class="stock-bar">
+              {% widthratio i.available_quantity 100 100 as bar_pct %}
+              <div class="stock-fill" style="width:{% if i.available_quantity > 100 %}100{% else %}{{ i.available_quantity }}{% endif %}%;
+                {% if i.available_quantity > 50 %}background:var(--accent-g);
+                {% elif i.available_quantity > 10 %}background:var(--accent);
+                {% elif i.available_quantity > 0 %}background:#fbbf24;
+                {% else %}background:var(--accent-r);{% endif %}
+              "></div>
+            </div>
+          </td>
+
+          <td style="font-weight:600;">{{ i.used_quantity }}</td>
+
+          <!-- Status -->
+          <td>
+            {% if i.available_quantity > 50 %}
+              <span class="inv-badge available"><i class="bi bi-check-circle-fill"></i> In Stock</span>
+            {% elif i.available_quantity > 10 %}
+              <span class="inv-badge available"><i class="bi bi-check-circle"></i> Moderate</span>
+            {% elif i.available_quantity > 0 %}
+              <span class="inv-badge low"><i class="bi bi-exclamation-triangle-fill"></i> Low Stock</span>
+            {% else %}
+              <span class="inv-badge out"><i class="bi bi-x-circle-fill"></i> Out of Stock</span>
+            {% endif %}
+          </td>
+
+          <td style="font-size:.8rem;color:var(--muted);">{{ i.last_updated|date:"d M Y" }}</td>
+
+          <td>
+            <div class="d-flex gap-1">
+              <a href="/editinventory/{{ i.id }}/" class="btn-b" style="padding:.34rem .6rem;font-size:.78rem;">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="/delinventory/{{ i.id }}/" class="btn-r" style="padding:.34rem .6rem;font-size:.78rem;"
+                 onclick="return confirm('Delete this inventory record?')">
+                <i class="bi bi-trash3"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9">
+            <div style="text-align:center;padding:3rem 1rem;color:var(--muted);">
+              <i class="bi bi-archive" style="font-size:2.5rem;display:block;margin-bottom:.8rem;"></i>
+              <div style="font-weight:600;font-size:1rem;margin-bottom:.3rem;color:var(--text);">No Inventory Records</div>
+              <div style="font-size:.84rem;">Inventory is auto-created when orders are placed. You can also add records manually.</div>
+              <a href="/insertinventory/" class="btn-y" style="margin-top:1rem;display:inline-flex;">
+                <i class="bi bi-plus-lg"></i> Add Inventory
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Auto-update info -->
+<div style="margin-top:1rem;padding:1rem 1.2rem;border-radius:12px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);">
+  <div style="display:flex;align-items:flex-start;gap:.7rem;">
+    <i class="bi bi-lightning-charge-fill" style="color:#34d399;font-size:1.1rem;margin-top:.1rem;"></i>
+    <div style="font-size:.82rem;color:var(--dim);line-height:1.7;">
+      <strong style="color:#34d399;">Auto-Update Rules:</strong><br>
+      <i class="bi bi-check2"></i> <strong>Order Placed</strong> → Inventory increases at project site, material stock decreases<br>
+      <i class="bi bi-check2"></i> <strong>Order Delivered</strong> → Payment auto-confirmed, delivery record created<br>
+      <i class="bi bi-check2"></i> <strong>Order Cancelled</strong> → Inventory reversed, material stock restored, payment refunded
+    </div>
+  </div>
+</div>
+
+{% endblock %}

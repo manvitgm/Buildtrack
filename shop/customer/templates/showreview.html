@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Reviews{% endblock %}
+{% block page_title %}Supplier & Material Reviews{% endblock %}
+{% block nav_rev %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="breadcrumb-bar m-0">
+    <span class="cur">Recent Reviews</span>
+  </div>
+  <a href="/insertreview/" class="btn-y"><i class="bi bi-pencil-square"></i> Write Review</a>
+</div>
+
+<div class="card fu">
+  <div style="overflow-x:auto;">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Reviewer</th>
+          <th>Supplier</th>
+          <th>Material</th>
+          <th>Rating</th>
+          <th>Comments</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in data %}
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--text);">{{ r.reviewer.name }}</div>
+            <div style="font-size:.7rem;color:var(--muted);">{{ r.reviewer.role|title }}</div>
+          </td>
+          <td>
+            <div style="font-weight:600;font-size:.85rem;color:var(--accent-b);">{{ r.supplier.company_name }}</div>
+          </td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ r.material.material_name }}</td>
+          <td>
+            <div style="color:var(--accent);font-size:.9rem;">
+              {% if r.rating == 5 %}⭐⭐⭐⭐⭐
+              {% elif r.rating == 4 %}⭐⭐⭐⭐<span style="opacity:0.3">⭐</span>
+              {% elif r.rating == 3 %}⭐⭐⭐<span style="opacity:0.3">⭐⭐</span>
+              {% elif r.rating == 2 %}⭐⭐<span style="opacity:0.3">⭐⭐⭐</span>
+              {% elif r.rating == 1 %}⭐<span style="opacity:0.3">⭐⭐⭐⭐</span>
+              {% else %}—{% endif %}
+            </div>
+          </td>
+          <td style="color:var(--muted);font-size:.82rem;max-width:250px;">{{ r.comments }}</td>
+          <td style="color:var(--muted);font-size:.8rem;">{{ r.review_date|date:"d M Y" }}</td>
+          <td>
+            {% if request.session.user_role == 'admin' or request.session.uid == r.reviewer.id %}
+            <a href="/delreview/{{ r.id }}/" class="btn-r" style="padding:.34rem .6rem;font-size:.8rem;" onclick="return confirm('Delete this review?')"><i class="bi bi-trash"></i></a>
+            {% else %}
+            <span style="color:var(--muted);font-size:.75rem;">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty"><i class="bi bi-star"></i>No reviews yet.<br><a href="/insertreview/" style="color:var(--accent);font-size:.84rem;">Write the first review →</a></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

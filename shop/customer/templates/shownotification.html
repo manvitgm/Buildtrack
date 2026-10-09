@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Your Notifications{% endblock %}
+{% block nav_notif %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="breadcrumb-bar m-0">
+    <span class="cur">Recent Activity</span>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card fu">
+      <div class="card-head">
+        <h5><i class="bi bi-bell-fill me-2" style="color:var(--accent)"></i>Notifications</h5>
+      </div>
+      <div class="card-body-pad p-0">
+        
+        {% if data %}
+          <div style="display:flex;flex-direction:column;">
+            {% for n in data %}
+            <div style="padding:1.2rem;border-bottom:1px solid var(--border);display:flex;gap:1rem;transition:background .2s;" 
+                 onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+              
+              <!-- Icon based on title -->
+              <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                {% if '✅' in n.title %}background:rgba(16,185,129,.1);color:#34d399;
+                {% elif '❌' in n.title %}background:rgba(239,68,68,.1);color:#f87171;
+                {% elif '🚚' in n.title %}background:rgba(139,92,246,.1);color:#a78bfa;
+                {% else %}background:rgba(59,130,246,.1);color:#60a5fa;{% endif %}">
+                {% if '✅' in n.title %}<i class="bi bi-check-lg" style="font-size:1.2rem;"></i>
+                {% elif '❌' in n.title %}<i class="bi bi-x-lg" style="font-size:1.2rem;"></i>
+                {% elif '🚚' in n.title %}<i class="bi bi-truck" style="font-size:1.2rem;"></i>
+                {% else %}<i class="bi bi-bell" style="font-size:1.1rem;"></i>{% endif %}
+              </div>
+              
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.3rem;">
+                  <h6 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:.95rem;color:var(--text);">
+                    {{ n.title }}
+                  </h6>
+                  <span style="font-size:.7rem;color:var(--muted);white-space:nowrap;">{{ n.notification_date|timesince }} ago</span>
+                </div>
+                <p style="margin:0;font-size:.85rem;color:var(--muted);line-height:1.5;">{{ n.message }}</p>
+              </div>
+
+              <div>
+                <a href="/delnotification/{{ n.id }}/" class="btn-r" style="padding:.3rem .5rem;font-size:.75rem;" title="Delete notification">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty" style="padding:4rem 2rem;">
+            <i class="bi bi-bell-slash" style="font-size:2.5rem;color:var(--border);margin-bottom:1rem;display:block;"></i>
+            You have no notifications.<br>
+            <span style="font-size:.8rem;color:var(--muted);">System alerts and order updates will appear here.</span>
+          </div>
+        {% endif %}
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head"><h5><i class="bi bi-info-circle me-2" style="color:var(--accent-b)"></i>Notification Settings</h5></div>
+      <div class="card-body-pad">
+        <p style="color:var(--dim);font-size:.85rem;line-height:1.6;margin-bottom:1.5rem;">
+          Notifications are automatically marked as read when you open this page.
+        </p>
+        
+        <div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:.8rem;text-transform:uppercase;letter-spacing:1px;">You will receive alerts for:</div>
+        
+        <div style="display:flex;flex-direction:column;gap:.6rem;font-size:.85rem;color:var(--muted);">
+          <div style="display:flex;align-items:center;gap:.6rem;"><i class="bi bi-bag-check" style="color:#34d399;"></i> Order Placements</div>
+          <div style="display:flex;align-items:center;gap:.6rem;"><i class="bi bi-truck" style="color:#a78bfa;"></i> Delivery Updates</div>
+          <div style="display:flex;align-items:center;gap:.6rem;"><i class="bi bi-x-circle" style="color:#f87171;"></i> Order Cancellations</div>
+          <div style="display:flex;align-items:center;gap:.6rem;"><i class="bi bi-cash-coin" style="color:#fbbf24;"></i> Payment Refunds</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

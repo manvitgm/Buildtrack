@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+{% block title %}Add Project Site{% endblock %}
+{% block page_title %}Project Sites{% endblock %}
+{% block nav_prj %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  #location-map {
+    height: 260px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: .5rem;
+    z-index: 1;
+  }
+  .gps-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .55rem 1.1rem;
+    border: 1px solid rgba(16,185,129,.3);
+    border-radius: 8px;
+    background: rgba(16,185,129,.1);
+    color: #34d399;
+    font-weight: 600;
+    font-size: .86rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .gps-btn:hover {
+    background: rgba(16,185,129,.22);
+    border-color: rgba(16,185,129,.5);
+  }
+  .gps-btn.capturing {
+    animation: pulse-gps 1.2s infinite;
+  }
+  @keyframes pulse-gps {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,.3); }
+    50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+  }
+  .gps-status {
+    font-size: .78rem;
+    color: var(--muted);
+    margin-top: .35rem;
+    min-height: 1.2rem;
+  }
+  .gps-status.success { color: #34d399; }
+  .gps-status.error { color: #f87171; }
+  .staff-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    padding: .85rem 1rem;
+    border-radius: 8px;
+    background: rgba(59,130,246,.08);
+    border: 1px solid rgba(59,130,246,.2);
+    color: #93c5fd;
+    font-size: .84rem;
+    margin-bottom: 1rem;
+  }
+  .staff-notice i { font-size: 1.1rem; color: #60a5fa; flex-shrink: 0; margin-top: .1rem; }
+  .coord-display {
+    display: flex;
+    gap: .75rem;
+    margin-top: .5rem;
+  }
+  .coord-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .3rem .65rem;
+    border-radius: 6px;
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.15);
+    font-size: .76rem;
+    color: var(--dim);
+    font-family: 'Barlow Condensed', monospace;
+  }
+  .coord-chip strong { color: var(--accent); font-weight: 700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+  <a href="/viewprojectsite/">Project Sites</a><span class="sep">/</span><span class="cur">Add New</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card fu">
+      <div class="card-head">
+        <h5><i class="bi bi-map me-2" style="color:var(--accent)"></i>Project Site Details</h5>
+      </div>
+      <div class="card-body-pad">
+
+        {% if not is_admin %}
+        <div class="staff-notice">
+          <i class="bi bi-info-circle-fill"></i>
+          <div>
+            <strong>Staff Submission</strong> — Your project site will be submitted for admin approval.
+            Admin will be able to see your exact location on the map to verify.
+          </div>
+        </div>
+        {% endif %}
+
+        <form method="post">{% csrf_token %}
+          <!-- Hidden GPS fields -->
+          <input type="hidden" name="latitude" id="lat-field">
+          <input type="hidden" name="longitude" id="lng-field">
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="f-label">Site Name *</label>
+              <input class="f-ctrl" type="text" name="site_name" placeholder="e.g. Prestige Tower Block-A" required>
+            </div>
+
+            <!-- GPS Location Section -->
+            <div class="col-12">
+              <label class="f-label">Site Location</label>
+              <div style="display:flex; gap:.75rem; align-items:flex-start; flex-wrap:wrap;">
+                <button type="button" class="gps-btn" id="gps-btn" onclick="captureLocation()">
+                  <i class="bi bi-geo-alt-fill"></i> 📍 Share My Location
+                </button>
+                <div style="flex:1; min-width:200px;">
+                  <input class="f-ctrl" type="text" name="location" id="location-text" placeholder="Address will be auto-filled from GPS…">
+                </div>
+              </div>
+              <div class="gps-status" id="gps-status"></div>
+              <div class="coord-display" id="coord-display" style="display:none;">
+                <div class="coord-chip"><i class="bi bi-geo"></i> Lat: <strong id="lat-display">—</strong></div>
+                <div class="coord-chip"><i class="bi bi-geo"></i> Lng: <strong id="lng-display">—</strong></div>
+              </div>
+              <!-- Map Preview -->
+              <div id="location-map" style="display:none;"></div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Manager</label>
+              <select class="f-ctrl" name="manager">
+                <option value="">— Select Manager —</option>
+                {% for u in users %}
+                <option value="{{ u.id }}">{{ u.name }} ({{ u.role }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Project Type</label>
+              <select class="f-ctrl" name="project_type">
+                <option value="Residential">🏠 Residential</option>
+                <option value="Commercial">🏢 Commercial</option>
+                <option value="Industrial">🏭 Industrial</option>
+                <option value="Infrastructure">🛣️ Infrastructure</option>
+                <option value="Renovation">🔨 Renovation</option>
+                <option value="Mixed">🏗️ Mixed Use</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Start Date</label>
+              <input class="f-ctrl" type="date" name="start_date">
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Expected End Date</label>
+              <input class="f-ctrl" type="date" name="expected_end_date">
+            </div>
+
+            {% if is_admin %}
+            <div class="col-12">
+              <label class="f-label">Status</label>
+              <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.25rem;">
+                <label style="cursor:pointer;">
+                  <input type="radio" name="status" value="planning" checked style="display:none;" class="status-radio">
+                  <span class="status-pill" data-val="planning" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:7px;border:1px solid rgba(59,130,246,.3);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;background:rgba(59,130,246,.12);color:#60a5fa;">📋 Planning</span>
+                </label>
+                <label style="cursor:pointer;">
+                  <input type="radio" name="status" value="active" style="display:none;" class="status-radio">
+                  <span class="status-pill" data-val="active" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:7px;border:1px solid var(--border);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;">🟢 Active</span>
+                </label>
+                <label style="cursor:pointer;">
+                  <input type="radio" name="status" value="on_hold" style="display:none;" class="status-radio">
+                  <span class="status-pill" data-val="on_hold" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:7px;border:1px solid var(--border);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;">⏸ On Hold</span>
+                </label>
+                <label style="cursor:pointer;">
+                  <input type="radio" name="status" value="completed" style="display:none;" class="status-radio">
+                  <span class="status-pill" data-val="completed" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:7px;border:1px solid var(--border);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;">✅ Completed</span>
+                </label>
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+          <hr class="divider">
+          <div class="d-flex gap-2">
+            {% if is_admin %}
+            <button type="submit" class="btn-y"><i class="bi bi-check-lg"></i> Save Project</button>
+            {% else %}
+            <button type="submit" class="btn-y"><i class="bi bi-send"></i> Submit for Approval</button>
+            {% endif %}
+            <a href="/viewprojectsite/" class="btn-o"><i class="bi bi-x"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head"><h5><i class="bi bi-bar-chart me-2" style="color:var(--accent-g)"></i>Project Overview</h5></div>
+      <div class="card-body-pad">
+        <div class="row g-3 mb-3">
+          <div class="col-6"><div class="stat g" style="padding:.85rem;"><div class="stat-num">{{ total_projects|default:0 }}</div><div class="stat-lbl">Total Sites</div></div></div>
+          <div class="col-6"><div class="stat a" style="padding:.85rem;"><div class="stat-num">{{ active_projects|default:0 }}</div><div class="stat-lbl">Active</div></div></div>
+        </div>
+
+        <!-- How it works info -->
+        <div style="padding:.85rem; border-radius:8px; background:rgba(139,92,246,.06); border:1px solid rgba(139,92,246,.15);">
+          <h6 style="font-family:'Barlow Condensed',sans-serif; font-weight:700; color:#a78bfa; margin-bottom:.5rem; font-size:.88rem;">
+            <i class="bi bi-lightbulb me-1"></i> How GPS Location Works
+          </h6>
+          <div style="font-size:.78rem; color:var(--muted); line-height:1.6;">
+            <div style="margin-bottom:.3rem;">📡 Your <strong>current location is detected automatically</strong></div>
+            <div style="margin-bottom:.3rem;">📍 Allow browser GPS access when prompted</div>
+            <div style="margin-bottom:.3rem;">🗺️ Your exact pin appears on the map</div>
+            <div>✏️ You can drag the pin to fine-tune</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Status pill toggle
+document.querySelectorAll('.status-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.status-pill').forEach(p => { p.style.background=''; p.style.color=''; p.style.borderColor='var(--border)'; });
+    const v = pill.dataset.val;
+    const colors = {planning:['rgba(59,130,246,.12)','#60a5fa','rgba(59,130,246,.3)'], active:['rgba(16,185,129,.12)','#34d399','rgba(16,185,129,.3)'], on_hold:['rgba(245,158,11,.12)','#fbbf24','rgba(245,158,11,.3)'], completed:['rgba(113,113,122,.12)','#a1a1aa','rgba(113,113,122,.3)']};
+    const [bg, color, border] = colors[v] || [];
+    pill.style.background = bg; pill.style.color = color; pill.style.borderColor = border;
+  });
+});
+
+// ── GPS LOCATION CAPTURE ────────────────────────────────
+let map = null;
+let marker = null;
+
+function captureLocation() {
+  const btn = document.getElementById('gps-btn');
+  const status = document.getElementById('gps-status');
+
+  if (!navigator.geolocation) {
+    status.textContent = '❌ Geolocation not supported by your browser.';
+    status.className = 'gps-status error';
+    return;
+  }
+
+  btn.classList.add('capturing');
+  btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Capturing…';
+  status.textContent = '📡 Acquiring GPS signal…';
+  status.className = 'gps-status';
+
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      // Set hidden fields
+      document.getElementById('lat-field').value = lat;
+      document.getElementById('lng-field').value = lng;
+
+      // Display coordinates
+      document.getElementById('lat-display').textContent = lat.toFixed(6);
+      document.getElementById('lng-display').textContent = lng.toFixed(6);
+      document.getElementById('coord-display').style.display = 'flex';
+
+      // Update button
+      btn.classList.remove('capturing');
+      btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Location Captured';
+      btn.style.borderColor = 'rgba(16,185,129,.5)';
+      btn.style.background = 'rgba(16,185,129,.2)';
+
+      status.textContent = '✅ GPS location captured successfully!';
+      status.className = 'gps-status success';
+
+      // Show map
+      showMap(lat, lng);
+
+      // Reverse geocode to get address
+      reverseGeocode(lat, lng);
+    },
+    function(error) {
+      btn.classList.remove('capturing');
+      btn.innerHTML = '<i class="bi bi-geo-alt-fill"></i> 📍 Try Again';
+
+      let msg = '❌ ';
+      switch(error.code) {
+        case 1: msg += 'Location permission denied. Please allow GPS access.'; break;
+        case 2: msg += 'Location unavailable. Check your GPS settings.'; break;
+        case 3: msg += 'Location request timed out. Try again.'; break;
+        default: msg += 'Unknown error getting location.';
+      }
+      status.textContent = msg;
+      status.className = 'gps-status error';
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+function showMap(lat, lng) {
+  const mapDiv = document.getElementById('location-map');
+  mapDiv.style.display = 'block';
+
+  if (map) {
+    map.setView([lat, lng], 16);
+    marker.setLatLng([lat, lng]);
+    return;
+  }
+
+  map = L.map('location-map', {
+    zoomControl: true,
+    scrollWheelZoom: true
+  }).setView([lat, lng], 16);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19
+  }).addTo(map);
+
+  marker = L.marker([lat, lng], {
+    draggable: true
+  }).addTo(map)
+    .bindPopup('<strong>📍 Project Site Location</strong><br>Drag to adjust')
+    .openPopup();
+
+  // Allow dragging marker to adjust location
+  marker.on('dragend', function(e) {
+    const pos = e.target.getLatLng();
+    document.getElementById('lat-field').value = pos.lat;
+    document.getElementById('lng-field').value = pos.lng;
+    document.getElementById('lat-display').textContent = pos.lat.toFixed(6);
+    document.getElementById('lng-display').textContent = pos.lng.toFixed(6);
+    reverseGeocode(pos.lat, pos.lng);
+  });
+
+  // Fix map rendering in hidden containers
+  setTimeout(() => map.invalidateSize(), 200);
+}
+
+function reverseGeocode(lat, lng) {
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.display_name) {
+        document.getElementById('location-text').value = data.display_name;
+      }
+    })
+    .catch(() => {
+      // Silently fail — user can type address manually
+    });
+}
+
+// ── AUTO-CAPTURE: Grab staff's current location on page load ──
+{% if not is_admin %}
+window.addEventListener('DOMContentLoaded', function() {
+  // Small delay so the page renders first
+  setTimeout(captureLocation, 600);
+});
+{% endif %}
+</script>
+{% endblock %}

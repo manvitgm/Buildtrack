@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Inventory{% endblock %}
+{% block page_title %}Inventory{% endblock %}
+{% block nav_inv %}active{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar">
+  <a href="/viewinventory/">Inventory</a>
+  <span class="sep">/</span>
+  <span class="cur">Add New</span>
+</div>
+
+<div class="row g-3">
+
+  <div class="col-lg-7">
+
+    <div class="card fu">
+
+      <div class="card-head">
+        <h5>
+          <i class="bi bi-archive me-2" style="color:var(--accent)"></i>
+          Add Inventory
+        </h5>
+      </div>
+
+      <div class="card-body-pad">
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row g-3">
+
+            <!-- Project Site -->
+            <div class="col-md-6">
+
+              <label class="f-label">
+                Project Site *
+              </label>
+
+              <select class="f-ctrl" name="project_site" required>
+
+                <option value="">
+                  -- Select Project Site --
+                </option>
+
+                {% for p in projects %}
+
+                <option value="{{ p.id }}">
+                  {{ p.site_name }}
+                </option>
+
+                {% endfor %}
+
+              </select>
+
+            </div>
+
+            <!-- Material -->
+            <div class="col-md-6">
+
+              <label class="f-label">
+                Material *
+              </label>
+
+              <select class="f-ctrl" name="material" required>
+
+                <option value="">
+                  -- Select Material --
+                </option>
+
+                {% for m in materials %}
+
+                <option value="{{ m.id }}">
+                  {{ m.material_name }}
+                </option>
+
+                {% endfor %}
+
+              </select>
+
+            </div>
+
+            <!-- Available Quantity -->
+            <div class="col-md-6">
+
+              <label class="f-label">
+                Available Quantity
+              </label>
+
+              <input type="number"
+                     name="available_quantity"
+                     class="f-ctrl"
+                     placeholder="Enter available quantity"
+                     required>
+
+            </div>
+
+            <!-- Used Quantity -->
+            <div class="col-md-6">
+
+              <label class="f-label">
+                Used Quantity
+              </label>
+
+              <input type="number"
+                     name="used_quantity"
+                     class="f-ctrl"
+                     placeholder="Enter used quantity"
+                     value="0">
+
+            </div>
+
+            <!-- Last Updated removed because model uses auto_now=True -->
+
+          </div>
+
+          <hr class="divider">
+
+          <div class="d-flex gap-2">
+
+            <button type="submit" class="btn-y">
+              <i class="bi bi-check-lg"></i>
+              Save Inventory
+            </button>
+
+            <a href="/viewinventory/" class="btn-o">
+              <i class="bi bi-x"></i>
+              Cancel
+            </a>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RIGHT SIDE CARD -->
+
+  <div class="col-lg-5">
+
+    <div class="card fu" style="animation-delay:.1s">
+
+      <div class="card-head">
+        <h5>
+          <i class="bi bi-bar-chart me-2" style="color:var(--accent-g)"></i>
+          Inventory Overview
+        </h5>
+      </div>
+
+      <div class="card-body-pad">
+
+        <div class="row g-3">
+
+          <div class="col-6">
+
+            <div class="stat g" style="padding:.85rem;">
+
+              <div class="stat-num">
+                {{ total_inventory|default:0 }}
+              </div>
+
+              <div class="stat-lbl">
+                Total Inventory
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="col-6">
+
+            <div class="stat a" style="padding:.85rem;">
+
+              <div class="stat-num">
+                {{ materials|length }}
+              </div>
+
+              <div class="stat-lbl">
+                Materials
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <hr class="divider">
+
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.8;">
+
+          Inventory helps you track:
+          <br><br>
+
+          • Material stock at each project site
+          <br>
+
+          • Used vs available quantity
+          <br>
+
+          • Low stock management
+          <br>
+
+          • Material movement tracking
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

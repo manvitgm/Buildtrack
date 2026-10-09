@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Edit Category{% endblock %}
+{% block page_title %}Material Categories{% endblock %}
+{% block nav_cat %}active{% endblock %}
+{% block content %}
+<div class="breadcrumb-bar mb-3">
+  <a href="/viewmaterialcategory/" style="color:var(--text);text-decoration:none;">Categories</a> <span class="sep" style="color:var(--muted);margin:0 .5rem;">/</span> <span class="cur" style="color:var(--accent);">Edit Category</span>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card fu">
+      <div class="card-head" style="padding:1rem;border-bottom:1px solid var(--border);margin-bottom:1rem;">
+        <h5 style="margin:0;"><i class="bi bi-tags me-2" style="color:var(--accent)"></i>Edit Category</h5>
+      </div>
+      <div class="card-body-pad" style="padding:0 1rem 1rem 1rem;">
+        <form method="post">{% csrf_token %}
+          <div class="f-group" style="margin-bottom:1rem;">
+            <label class="f-label" style="display:block;margin-bottom:.4rem;font-size:.85rem;color:var(--dim);">Category Name *</label>
+            <input class="f-ctrl" type="text" name="category_name" value="{{ x.category_name }}" required style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">
+          </div>
+          <div class="f-group" style="margin-bottom:1rem;">
+            <label class="f-label" style="display:block;margin-bottom:.4rem;font-size:.85rem;color:var(--dim);">Description</label>
+            <textarea class="f-ctrl" name="description" rows="3" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">{{ x.description }}</textarea>
+          </div>
+          <div class="f-group" style="margin-bottom:1.5rem;">
+            <label class="f-label" style="display:block;margin-bottom:.4rem;font-size:.85rem;color:var(--dim);">Parent Category (optional)</label>
+            <select class="f-ctrl" name="parent_category" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">
+              <option value="">— None (Top-level) —</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}" {% if cat.id|stringformat:"s" == x.parent_category %}selected{% endif %}>{{ cat.category_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <hr class="divider" style="border-color:var(--border);margin-bottom:1rem;">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-y" style="padding:.5rem 1rem;border-radius:8px;border:none;background:var(--accent);color:#000;font-weight:600;"><i class="bi bi-check-lg"></i> Update Category</button>
+            <a href="/viewmaterialcategory/" class="btn-o" style="padding:.5rem 1rem;border-radius:8px;border:1px solid var(--border);color:var(--text);text-decoration:none;"><i class="bi bi-x"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

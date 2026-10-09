@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}User Management{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block nav_user %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 style="font-weight:700;">System Users</h4>
+        <p style="color:var(--muted);font-size:.85rem;">
+            {{ data|length }} registered users
+        </p>
+    </div>
+    {% if request.session.user_role == 'admin' %}
+    <a href="/insertuserregistration/" class="btn-y">
+        <i class="bi bi-person-plus-fill"></i>
+        Add User
+    </a>
+    {% endif %}
+</div>
+
+<div class="card fu">
+  <div style="overflow-x:auto;">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Contact</th>
+          <th>City</th>
+          <th>Role</th>
+          {% if request.session.user_role == 'admin' %}
+          <th>Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in data %}
+        <tr>
+          <td style="font-weight:700;color:var(--text);">
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <div style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;">
+                {{ i.name|slice:":1"|upper }}
+              </div>
+              {{ i.name }}
+            </div>
+          </td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ i.email }}</td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ i.contact }}</td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ i.city }}</td>
+          <td>
+            {% if i.role == 'admin' %}
+            <span style="background:rgba(239,68,68,.1);color:#ef4444;padding:.2rem .6rem;border-radius:20px;font-size:.75rem;font-weight:700;">
+              Admin
+            </span>
+            {% else %}
+            <span style="background:rgba(16,185,129,.1);color:#10b981;padding:.2rem .6rem;border-radius:20px;font-size:.75rem;font-weight:700;">
+              Staff {% if i.staff_role %}({{ i.staff_role }}){% endif %}
+            </span>
+            {% endif %}
+          </td>
+          {% if request.session.user_role == 'admin' %}
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'delusereg' i.id %}" class="btn-r" style="padding:.34rem .6rem;font-size:.8rem;" onclick="return confirm('Delete this user?')"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty" style="text-align:center;padding:2rem;"><i class="bi bi-people" style="font-size:2rem;color:var(--muted);margin-bottom:1rem;display:block;"></i>No users found.<br><br><a href="/insertuserregistration/" style="color:var(--accent);font-size:.84rem;">Add first user →</a></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

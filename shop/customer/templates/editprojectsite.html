@@ -1,0 +1,358 @@
+<!-- templates/editprojectsite.html -->
+{% extends 'base.html' %}
+
+{% block title %}Edit Project Site{% endblock %}
+{% block page_title %}Edit Project Site{% endblock %}
+{% block nav_prj %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  #edit-map {
+    height: 280px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: .5rem;
+    z-index: 1;
+  }
+  .gps-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .5rem 1rem;
+    border: 1px solid rgba(16,185,129,.3);
+    border-radius: 8px;
+    background: rgba(16,185,129,.1);
+    color: #34d399;
+    font-weight: 600;
+    font-size: .84rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .gps-btn:hover {
+    background: rgba(16,185,129,.22);
+    border-color: rgba(16,185,129,.5);
+  }
+  .coord-display {
+    display: flex;
+    gap: .75rem;
+    margin-top: .5rem;
+  }
+  .coord-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .3rem .65rem;
+    border-radius: 6px;
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.15);
+    font-size: .76rem;
+    color: var(--dim);
+    font-family: 'Barlow Condensed', monospace;
+  }
+  .coord-chip strong { color: var(--accent); font-weight: 700; }
+  .approval-info {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem 1rem;
+    border-radius: 8px;
+    font-size: .84rem;
+    margin-bottom: 1rem;
+  }
+  .approval-info.pending {
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.2);
+    color: #fbbf24;
+  }
+  .approval-info.approved {
+    background: rgba(16,185,129,.08);
+    border: 1px solid rgba(16,185,129,.2);
+    color: #34d399;
+  }
+  .approval-info.rejected {
+    background: rgba(239,68,68,.08);
+    border: 1px solid rgba(239,68,68,.2);
+    color: #f87171;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar">
+  <a href="/viewprojectsite/">Project Sites</a><span class="sep">/</span><span class="cur">Edit: {{ x.site_name }}</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-head">
+        <h5><i class="bi bi-pencil-square me-2" style="color:var(--accent)"></i>Edit Project Site</h5>
+      </div>
+
+      <div class="card-body-pad">
+
+        <!-- Show approval status -->
+        {% if x.approval_status == 'pending' %}
+        <div class="approval-info pending">
+          <i class="bi bi-clock-history"></i> This site is <strong>pending</strong> admin approval.
+        </div>
+        {% elif x.approval_status == 'rejected' %}
+        <div class="approval-info rejected">
+          <i class="bi bi-x-circle"></i> This site was <strong>rejected</strong>. Edit and resubmit.
+        </div>
+        {% elif x.approval_status == 'approved' %}
+        <div class="approval-info approved">
+          <i class="bi bi-check-circle"></i> This site is <strong>approved</strong>.
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Hidden GPS fields -->
+            <input type="hidden" name="latitude" id="lat-field" value="{{ x.latitude|default:'' }}">
+            <input type="hidden" name="longitude" id="lng-field" value="{{ x.longitude|default:'' }}">
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Manager</label>
+                        <select class="f-ctrl" name="manager" required>
+                            <option value="">— Select Manager —</option>
+                            {% for u in users %}
+                                <option value="{{ u.id }}" {% if u.id|stringformat:"s" == x.manager|stringformat:"s" %}selected{% endif %}>{{ u.name }} ({{ u.role }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Site Name</label>
+                        <input type="text" name="site_name" class="f-ctrl" value="{{ x.site_name }}" required>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="f-group">
+                        <label class="f-label">Location</label>
+                        <textarea name="location" class="f-ctrl" id="location-text" required>{{ x.location }}</textarea>
+                    </div>
+                </div>
+
+                <!-- GPS Location -->
+                <div class="col-md-12">
+                    <div class="f-group">
+                        <label class="f-label">GPS Coordinates</label>
+                        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                          <button type="button" class="gps-btn" onclick="captureLocation()">
+                            <i class="bi bi-geo-alt-fill"></i> 📍 Update My Location
+                          </button>
+                          <div class="coord-display" id="coord-display" {% if not x.latitude %}style="display:none;"{% endif %}>
+                            <div class="coord-chip"><i class="bi bi-geo"></i> Lat: <strong id="lat-display">{{ x.latitude|default:"—" }}</strong></div>
+                            <div class="coord-chip"><i class="bi bi-geo"></i> Lng: <strong id="lng-display">{{ x.longitude|default:"—" }}</strong></div>
+                          </div>
+                        </div>
+                        <div id="gps-status" style="font-size:.78rem;color:var(--muted);margin-top:.35rem;"></div>
+                        <!-- Map -->
+                        <div id="edit-map" {% if not x.latitude %}style="display:none;"{% endif %}></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Project Type</label>
+                        <select class="f-ctrl" name="project_type">
+                            <option value="Residential" {% if x.project_type == 'Residential' %}selected{% endif %}>🏠 Residential</option>
+                            <option value="Commercial" {% if x.project_type == 'Commercial' %}selected{% endif %}>🏢 Commercial</option>
+                            <option value="Industrial" {% if x.project_type == 'Industrial' %}selected{% endif %}>🏭 Industrial</option>
+                            <option value="Infrastructure" {% if x.project_type == 'Infrastructure' %}selected{% endif %}>🛣️ Infrastructure</option>
+                            <option value="Renovation" {% if x.project_type == 'Renovation' %}selected{% endif %}>🔨 Renovation</option>
+                            <option value="Mixed" {% if x.project_type == 'Mixed' %}selected{% endif %}>🏗️ Mixed Use</option>
+                        </select>
+                    </div>
+                </div>
+
+                {% if is_admin %}
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Status</label>
+                        <select class="f-ctrl" name="status">
+                            <option value="planning" {% if x.status == 'planning' %}selected{% endif %}>📋 Planning</option>
+                            <option value="active" {% if x.status == 'active' %}selected{% endif %}>🟢 Active</option>
+                            <option value="on_hold" {% if x.status == 'on_hold' %}selected{% endif %}>⏸ On Hold</option>
+                            <option value="completed" {% if x.status == 'completed' %}selected{% endif %}>✅ Completed</option>
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Start Date</label>
+                        <input type="date" name="start_date" class="f-ctrl" value="{{ x.start_date }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Expected End Date</label>
+                        <input type="date" name="expected_end_date" class="f-ctrl" value="{{ x.expected_end_date }}">
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn-y">
+                <i class="bi bi-check-lg"></i> Update Project Site
+            </button>
+
+            <a href="/viewprojectsite/" class="btn-o">
+                Cancel
+            </a>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Side panel: Current map preview -->
+  <div class="col-lg-5">
+    {% if x.latitude and x.longitude %}
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head">
+        <h5><i class="bi bi-pin-map-fill me-2" style="color:var(--accent-p)"></i>Current Location</h5>
+      </div>
+      <div class="card-body-pad" style="padding:0;">
+        <div id="side-map" style="height:300px;border-radius:0 0 12px 12px;"></div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if x.created_by %}
+    <div class="card fu mt-3" style="animation-delay:.15s">
+      <div class="card-body-pad">
+        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.5rem;">Submitted By</div>
+        <div style="display:flex;align-items:center;gap:.6rem;">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#000;font-weight:800;">
+            {{ x.created_by.name|first|upper }}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:.88rem;">{{ x.created_by.name }}</div>
+            <div style="font-size:.72rem;color:var(--muted);text-transform:capitalize;">{{ x.created_by.role }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── Show existing map if coordinates exist ──
+{% if x.latitude and x.longitude %}
+(function() {
+  // Side map (read-only)
+  const sideMap = L.map('side-map').setView([{{ x.latitude }}, {{ x.longitude }}], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 19
+  }).addTo(sideMap);
+  L.marker([{{ x.latitude }}, {{ x.longitude }}]).addTo(sideMap)
+    .bindPopup('<strong>📍 {{ x.site_name|escapejs }}</strong>').openPopup();
+  setTimeout(() => sideMap.invalidateSize(), 200);
+
+  // Inline edit map
+  const editMap = L.map('edit-map').setView([{{ x.latitude }}, {{ x.longitude }}], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 19
+  }).addTo(editMap);
+  const editMarker = L.marker([{{ x.latitude }}, {{ x.longitude }}], { draggable: true }).addTo(editMap)
+    .bindPopup('Drag to adjust location');
+  editMarker.on('dragend', function(e) {
+    const pos = e.target.getLatLng();
+    document.getElementById('lat-field').value = pos.lat;
+    document.getElementById('lng-field').value = pos.lng;
+    document.getElementById('lat-display').textContent = pos.lat.toFixed(6);
+    document.getElementById('lng-display').textContent = pos.lng.toFixed(6);
+  });
+  setTimeout(() => editMap.invalidateSize(), 200);
+
+  window._editMap = editMap;
+  window._editMarker = editMarker;
+})();
+{% endif %}
+
+// ── GPS Capture ──
+function captureLocation() {
+  const status = document.getElementById('gps-status');
+  if (!navigator.geolocation) {
+    status.textContent = '❌ Geolocation not supported.';
+    status.style.color = '#f87171';
+    return;
+  }
+  status.textContent = '📡 Acquiring GPS…';
+  status.style.color = 'var(--muted)';
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      document.getElementById('lat-field').value = lat;
+      document.getElementById('lng-field').value = lng;
+      document.getElementById('lat-display').textContent = lat.toFixed(6);
+      document.getElementById('lng-display').textContent = lng.toFixed(6);
+      document.getElementById('coord-display').style.display = 'flex';
+      status.textContent = '✅ Location updated!';
+      status.style.color = '#34d399';
+
+      // Update or create map
+      const mapDiv = document.getElementById('edit-map');
+      mapDiv.style.display = 'block';
+
+      if (window._editMap) {
+        window._editMap.setView([lat, lng], 16);
+        window._editMarker.setLatLng([lat, lng]);
+      } else {
+        const editMap = L.map('edit-map').setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap', maxZoom: 19
+        }).addTo(editMap);
+        const marker = L.marker([lat, lng], { draggable: true }).addTo(editMap);
+        marker.on('dragend', function(e) {
+          const p = e.target.getLatLng();
+          document.getElementById('lat-field').value = p.lat;
+          document.getElementById('lng-field').value = p.lng;
+          document.getElementById('lat-display').textContent = p.lat.toFixed(6);
+          document.getElementById('lng-display').textContent = p.lng.toFixed(6);
+        });
+        window._editMap = editMap;
+        window._editMarker = marker;
+        setTimeout(() => editMap.invalidateSize(), 200);
+      }
+
+      // Reverse geocode
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.display_name) {
+            document.getElementById('location-text').value = data.display_name;
+          }
+        }).catch(() => {});
+    },
+    function(err) {
+      status.textContent = '❌ Could not get location. Check GPS permissions.';
+      status.style.color = '#f87171';
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+</script>
+{% endblock %}

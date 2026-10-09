@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Payments | BuildTrack{% endblock %}
+{% block page_title %}Payment Records{% endblock %}
+{% block nav_pay %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="breadcrumb-bar m-0">
+    <span class="cur">Financial Transactions</span>
+  </div>
+  <a href="/insertpayment/" class="btn-y"><i class="bi bi-plus-lg"></i> Record Payment</a>
+</div>
+
+<div class="card fu">
+  <div style="overflow-x:auto;">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Supplier</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Method</th>
+          <th>Transaction ID</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in data %}
+        <tr>
+          <td>
+            <span style="color:var(--accent); font-weight:700; font-family:'Barlow Condensed'">#{{ p.order }}</span>
+          </td>
+          <td style="color:var(--text); font-weight:600;">{{ p.supplier }}</td>
+          <td>
+            <div style="color:var(--accent-g); font-weight:800; font-size:1.1rem;">₹{{ p.amount }}</div>
+          </td>
+          <td style="color:var(--dim); font-size:.85rem;">{{ p.payment_date }}</td>
+          <td>
+            {% if p.payment_method == 'upi' %}
+              <span class="badge" style="background:rgba(124,58,237,.12);color:#7c3aed;padding:4px 10px;border-radius:6px;font-size:.78rem;font-weight:700;">📱 UPI</span>
+            {% elif p.payment_method == 'razorpay' %}
+              <span class="badge" style="background:rgba(217,119,6,.12);color:#d97706;padding:4px 10px;border-radius:6px;font-size:.78rem;font-weight:700;">💳 Razorpay</span>
+            {% elif p.payment_method == 'bank' %}
+              <span class="badge" style="background:rgba(37,99,235,.12);color:#2563eb;padding:4px 10px;border-radius:6px;font-size:.78rem;font-weight:700;">🏦 Bank Transfer</span>
+            {% else %}
+              <span class="badge" style="background:rgba(22,163,74,.12);color:#16a34a;padding:4px 10px;border-radius:6px;font-size:.78rem;font-weight:700;">💵 COD</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--muted); font-family:monospace; font-size:.8rem;">{{ p.transaction_id }}</td>
+          <td>
+            {% if p.status|lower == 'completed' %}
+              <span class="badge badge-green">Completed</span>
+            {% elif p.status|lower == 'pending' %}
+              <span class="badge badge-amber">Pending</span>
+            {% else %}
+              <span class="badge badge-red">{{ p.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/delpayment/{{ p.id }}/" class="btn-r" onclick="return confirm('Delete this record?')">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="empty">No payment records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

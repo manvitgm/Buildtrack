@@ -1,0 +1,498 @@
+{% extends 'base.html' %}
+
+{% block title %}Materials{% endblock %}
+{% block page_title %}Materials{% endblock %}
+{% block nav_mat %}active{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+
+    <div>
+        <h4 style="font-weight:700;margin-bottom:.2rem;">Material Catalog</h4>
+        <p style="color:var(--muted);font-size:.85rem;margin:0;">
+            {{ data|length }} material{% if data|length != 1 %}s{% endif %} available
+        </p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 400px; justify-content: flex-end;">
+        <form method="GET" action="/viewmaterial/" class="position-relative" style="flex:1;" id="searchForm">
+            <i class="bi bi-search position-absolute" style="top:50%;left:12px;transform:translateY(-50%);color:var(--muted);"></i>
+            <input type="text" name="q" id="searchInput" value="{{ q }}" placeholder="Search by name, code or category..." 
+                   autocomplete="off"
+                   style="width:100%;padding:.55rem 1rem .55rem 2.2rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;font-size:.88rem;transition:border-color .2s;"
+                   onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            {% if q %}
+            <a href="/viewmaterial/" class="position-absolute" style="top:50%;right:12px;transform:translateY(-50%);color:var(--muted);text-decoration:none;" title="Clear search">
+                <i class="bi bi-x-circle-fill"></i>
+            </a>
+            {% endif %}
+            
+            <!-- Suggestions Dropdown -->
+            <div id="suggestionsBox" class="position-absolute w-100 mt-1" style="display:none; z-index:1000; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+            </div>
+        </form>
+
+        {% if request.session.user_role == 'admin' %}
+        <a href="/insertmaterial/" class="btn-y flex-shrink-0" style="padding:.55rem 1rem;">
+            <i class="bi bi-plus-lg"></i>
+            Add Material
+        </a>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- MATERIAL GRID -->
+
+<div class="row g-4">
+
+{% for i in data %}
+
+<div class="col-lg-4 col-md-6">
+
+<div class="card fu h-100"
+style="
+border-radius:22px;
+overflow:hidden;
+background:var(--bg-card);
+border:1px solid var(--border);
+transition:.3s;
+">
+
+<!-- IMAGE -->
+
+<div style="
+height:220px;
+overflow:hidden;
+background:var(--bg);
+display:flex;
+align-items:center;
+justify-content:center;
+">
+
+{% if i.photo %}
+
+<img src="{{ i.photo.url }}"
+style="
+width:100%;
+height:100%;
+object-fit:cover;
+">
+
+{% else %}
+
+<div style="text-align:center;color:#52525b;">
+
+<i class="bi bi-image"
+style="font-size:3rem;"></i>
+
+<div style="margin-top:.5rem;font-size:.85rem;">
+No Image
+</div>
+
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- BODY -->
+
+<div style="padding:1.2rem;">
+
+<!-- TITLE -->
+
+<div class="d-flex justify-content-between align-items-start mb-2">
+
+<h5 style="
+font-weight:700;
+margin:0;
+font-size:1.05rem;
+">
+
+<a href="/material_detail/{{ i.id }}/" style="text-decoration:none;color:inherit;transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'">
+{{ i.material_name }}
+</a>
+
+</h5>
+
+<span style="
+background:rgba(255,229,0,.12);
+color:#ffe500;
+padding:.3rem .65rem;
+border-radius:30px;
+font-size:.72rem;
+font-weight:700;
+">
+
+{{ i.material_code }}
+
+</span>
+
+</div>
+
+<!-- CATEGORY -->
+
+<div style="
+font-size:.78rem;
+color:var(--muted);
+margin-bottom:.8rem;
+">
+
+{{ i.category }}
+
+</div>
+
+<!-- DESCRIPTION -->
+
+<div style="
+font-size:.84rem;
+line-height:1.6;
+color:var(--muted);
+min-height:60px;
+margin-bottom:1rem;
+">
+
+{{ i.description|default:"No description available."|truncatechars:120 }}
+
+</div>
+
+<!-- PRICE -->
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<div>
+
+<div style="
+font-size:.72rem;
+color:var(--muted);
+margin-bottom:2px;
+">
+PRICE
+</div>
+
+<div style="
+font-size:1.3rem;
+font-weight:800;
+color:#ffe500;
+">
+
+₹{{ i.price }}
+
+</div>
+
+</div>
+
+<div>
+
+<div style="
+font-size:.72rem;
+color:var(--muted);
+margin-bottom:2px;
+">
+STOCK
+</div>
+
+<div style="
+font-size:1rem;
+font-weight:700;
+">
+
+{{ i.stock_quantity }} {{ i.unit }}
+
+</div>
+
+</div>
+
+</div>
+
+<!-- QUALITY -->
+
+<div class="mb-3">
+
+{% if i.quality_status == 'good' %}
+
+<span style="
+background:rgba(34,197,94,.15);
+color:#22c55e;
+padding:.45rem .8rem;
+border-radius:30px;
+font-size:.75rem;
+font-weight:700;
+">
+
+✅ Good Quality
+
+</span>
+
+{% elif i.quality_status == 'average' %}
+
+<span style="
+background:rgba(234,179,8,.15);
+color:#eab308;
+padding:.45rem .8rem;
+border-radius:30px;
+font-size:.75rem;
+font-weight:700;
+">
+
+⚠ Average Quality
+
+</span>
+
+{% else %}
+
+<span style="
+background:rgba(239,68,68,.15);
+color:#ef4444;
+padding:.45rem .8rem;
+border-radius:30px;
+font-size:.75rem;
+font-weight:700;
+">
+
+❌ Poor Quality
+
+</span>
+
+{% endif %}
+
+</div>
+
+<!-- SUPPLIER -->
+
+<div style="
+display:flex;
+align-items:center;
+gap:.55rem;
+margin-bottom:1rem;
+">
+
+{% if i.supplier.logo %}
+<img src="{{ i.supplier.logo.url }}" style="width:28px;height:28px;border-radius:7px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;">
+{% else %}
+<div style="width:28px;height:28px;border-radius:7px;background:rgba(245,158,11,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+<i class="bi bi-building" style="color:#f59e0b;font-size:.75rem;"></i>
+</div>
+{% endif %}
+
+<div style="font-size:.8rem;color:var(--muted);line-height:1.2;">
+Supplier:
+<span style="color:var(--text);font-weight:600;">
+{{ i.supplier }}
+</span>
+</div>
+
+</div>
+
+<!-- ORDER / CART BUTTONS -->
+
+{% if i.stock_quantity and i.stock_quantity > 0 %}
+<form method="POST" action="/add_to_cart/{{ i.id }}/" class="d-flex gap-2 mb-2">
+{% csrf_token %}
+<input type="number" name="qty" value="1" min="1" max="{{ i.stock_quantity }}" 
+style="width: 60px; background: rgba(0,0,0,.04); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: .55rem; text-align: center; font-family: 'Barlow', sans-serif;">
+
+<button type="submit"
+style="
+flex:1;text-align:center;
+display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+padding:.55rem .8rem;border-radius:10px;
+border:1px solid rgba(245,158,11,.3);
+background:rgba(245,158,11,.08);
+color:#f59e0b;font-weight:700;font-size:.82rem;
+transition:.2s;cursor:pointer;
+">
+<i class="bi bi-cart-plus"></i> Add
+</button>
+
+<button type="submit" formaction="/buy_now/{{ i.id }}/"
+style="
+flex:1.2;text-align:center;
+display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+padding:.55rem .8rem;border-radius:10px;
+border:none;
+background:#f59e0b;
+color:#000;font-weight:700;font-size:.82rem;
+transition:.2s;cursor:pointer;
+">
+<i class="bi bi-bag-check"></i> Order Now
+</button>
+
+<a href="/material_detail/{{ i.id }}/"
+style="
+flex:0 0 auto;text-align:center;
+display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+padding:.55rem .8rem;border-radius:10px;
+border:1px solid var(--border);
+background:rgba(0,0,0,.04);
+color:var(--text);font-weight:700;font-size:.82rem;
+text-decoration:none;transition:.2s;
+" title="View Details">
+<i class="bi bi-eye"></i>
+</a>
+
+</form>
+{% else %}
+<div class="mb-2" style="
+text-align:center;padding:.5rem;border-radius:10px;
+background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);
+font-size:.82rem;color:#f87171;font-weight:600;
+">
+<i class="bi bi-exclamation-triangle"></i> Out of Stock
+</div>
+{% endif %}
+
+{% if request.session.user_role == 'admin' %}
+<!-- ADMIN ACTIONS -->
+
+<div class="d-flex gap-2">
+
+<a href="/editmaterial/{{ i.id }}/"
+class="btn-o"
+style="
+flex:1;
+text-align:center;
+">
+
+<i class="bi bi-pencil"></i>
+Edit
+
+</a>
+
+<a href="/delmaterial/{{ i.id }}/"
+class="btn-r"
+style="
+flex:1;
+text-align:center;
+"
+onclick="return confirm('Delete this material?')">
+
+<i class="bi bi-trash"></i>
+Delete
+
+</a>
+
+</div>
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+{% empty %}
+
+<div class="col-12">
+
+<div class="card fu p-5 text-center">
+
+<i class="bi bi-box-seam"
+style="
+font-size:4rem;
+color:#3f3f46;
+"></i>
+
+<h4 class="mt-3">
+No Materials Found
+</h4>
+
+<p style="color:var(--muted);">
+Start by adding your first material.
+</p>
+
+<a href="/insertmaterial/" class="btn-y mt-2">
+
+Add Material
+
+</a>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<style>
+.suggestion-item {
+    display: block;
+    padding: 0.6rem 1rem;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+}
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+.suggestion-item:hover {
+    background: var(--bg-hover);
+    color: var(--accent);
+}
+.suggestion-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    color: var(--dim);
+    margin-left: 0.4rem;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsBox = document.getElementById('suggestionsBox');
+    let debounceTimer;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            suggestionsBox.style.display = 'none';
+            return;
+        }
+        
+        debounceTimer = setTimeout(() => {
+            fetch(`/material_suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        let html = '';
+                        data.suggestions.forEach(item => {
+                            let codeBadge = item.code ? `<span class="suggestion-badge">${item.code}</span>` : '';
+                            let catBadge = item.category ? `<span class="suggestion-badge">${item.category}</span>` : '';
+                            html += `<a href="/material_detail/${item.id}/" class="suggestion-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>${item.name} ${codeBadge}</span>
+                                            ${catBadge}
+                                        </div>
+                                     </a>`;
+                        });
+                        suggestionsBox.innerHTML = html;
+                        suggestionsBox.style.display = 'block';
+                    } else {
+                        suggestionsBox.innerHTML = '<div class="p-3 text-center text-muted" style="font-size:0.85rem;">No materials found</div>';
+                        suggestionsBox.style.display = 'block';
+                    }
+                })
+                .catch(err => console.error("Error fetching suggestions:", err));
+        }, 300); // 300ms debounce
+    });
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.style.display = 'none';
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,252 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login | BuildTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root{--bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--accent:#f59e0b;--admin:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(245,158,11,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.03) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+.glow{position:fixed;width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;transition:background .5s;}
+.glow.admin-glow{}
+.corner{position:fixed;width:120px;height:120px;opacity:.25;transition:border-color .4s;}
+.corner.tl{top:20px;left:20px;border-top:1px solid var(--accent);border-left:1px solid var(--accent);}
+.corner.tr{top:20px;right:20px;border-top:1px solid var(--accent);border-right:1px solid var(--accent);}
+.corner.bl{bottom:20px;left:20px;border-bottom:1px solid var(--accent);border-left:1px solid var(--accent);}
+.corner.br{bottom:20px;right:20px;border-bottom:1px solid var(--accent);border-right:1px solid var(--accent);}
+.corner.admin-c{border-color:var(--admin)!important;}
+.wrap{position:relative;z-index:1;width:100%;max-width:440px;padding:1.5rem;}
+.logo-area{text-align:center;margin-bottom:2rem;}
+.logo-box{width:54px;height:54px;background:var(--accent);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4rem;color:#000;margin-bottom:.75rem;box-shadow:0 0 30px rgba(245,158,11,.25);transition:background .4s,box-shadow .4s;}
+.logo-box.admin-logo{background:var(--admin);box-shadow:0 0 30px rgba(239,68,68,.35);}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-size:1.9rem;font-weight:800;color:#0f172a;letter-spacing:1px;display:block;}
+.logo-tag{font-size:.65rem;color:#94a3b8;letter-spacing:3px;text-transform:uppercase;}
+
+/* TABS */
+.tab-bar{display:flex;margin-bottom:1.4rem;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg);}
+.tab-btn{flex:1;padding:.7rem .5rem;text-align:center;font-size:.82rem;font-weight:700;letter-spacing:.5px;cursor:pointer;border:none;background:transparent;color:#94a3b8;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:.4rem;}
+.tab-btn.active{background:var(--accent);color:#000;}
+.tab-btn.admin-tab.active{background:var(--admin);color:var(--text);}
+.tab-btn:hover:not(.active){background:rgba(0,0,0,.04);color:#64748b;}
+
+/* CARD */
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;transition:border-color .4s;}
+.login-card.admin-card{border-color:rgba(239,68,68,.3);}
+.login-card h2{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;color:#0f172a;margin-bottom:.2rem;}
+.login-card p{font-size:.83rem;color:#94a3b8;margin-bottom:1.4rem;}
+
+/* FORM */
+.fg{margin-bottom:1rem;}
+label{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;margin-bottom:.35rem;display:block;}
+.iw{position:relative;}
+.iw i.iw-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.88rem;pointer-events:none;}
+input{width:100%;background:#ffffff;border:1px solid var(--border);color:#0f172a;border-radius:8px;padding:.58rem 2.5rem .58rem 2.3rem;font-size:.9rem;font-family:'Barlow',sans-serif;transition:border .2s;}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+.eye-btn{position:absolute;right:.65rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;padding:.15rem;font-size:1rem;transition:color .2s;z-index:2;display:flex;align-items:center;}
+.eye-btn:hover{color:#64748b;}
+input.admin-focus:focus{border-color:var(--admin)!important;box-shadow:0 0 0 3px rgba(239,68,68,.12)!important;}
+.btn-login{width:100%;background:var(--accent);color:#000;border:none;border-radius:8px;padding:.65rem;font-size:.95rem;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;margin-top:.25rem;transition:all .2s;letter-spacing:.3px;}
+.btn-login:hover{background:#d97706;transform:translateY(-1px);box-shadow:0 4px 16px rgba(245,158,11,.25);}
+.btn-admin{background:var(--admin);color:var(--text);}
+.btn-admin:hover{background:#dc2626;box-shadow:0 4px 16px rgba(239,68,68,.25);}
+.link-row{text-align:center;margin-top:1.1rem;font-size:.83rem;color:#94a3b8;}
+.link-row a{color:var(--accent);text-decoration:none;font-weight:600;}
+.alert-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:8px;padding:.6rem .85rem;font-size:.83rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.alert-msg{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);color:#34d399;border-radius:8px;padding:.6rem .85rem;font-size:.83rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+
+/* Admin secret key hint */
+.admin-hint{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:.6rem .8rem;margin-bottom:1rem;font-size:.78rem;color:#fca5a5;display:flex;align-items:flex-start;gap:.5rem;}
+.admin-hint i{margin-top:1px;color:var(--admin);}
+
+/* Panel visibility */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* Pulse */
+@keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(245,158,11,.25)}50%{box-shadow:0 0 50px rgba(245,158,11,.45)}}
+@keyframes pulseRed{0%,100%{box-shadow:0 0 30px rgba(239,68,68,.25)}50%{box-shadow:0 0 50px rgba(239,68,68,.45)}}
+.logo-box{animation:pulse 3s ease-in-out infinite;}
+.logo-box.admin-logo{animation:pulseRed 3s ease-in-out infinite;}
+/* CAPTCHA */
+.captcha-box{margin:1rem 0 .5rem;}
+.captcha-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;}
+.captcha-row img{border-radius:8px;border:1px solid #cbd5e1;height:50px;flex-shrink:0;}
+.captcha-refresh{background:none;border:1px solid var(--border);color:#64748b;border-radius:8px;width:40px;height:50px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;font-size:1.1rem;}
+.captcha-refresh:hover{border-color:var(--accent);color:var(--accent);background:rgba(245,158,11,.06);}
+.captcha-refresh.spinning i{animation:spin .6s ease;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+input.captcha-input{padding-left:.85rem;letter-spacing:4px;font-weight:700;font-size:1rem;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow" id="glow"></div>
+<div class="corner tl" id="c1"></div><div class="corner tr" id="c2"></div>
+<div class="corner bl" id="c3"></div><div class="corner br" id="c4"></div>
+<div class="wrap">
+  <div class="logo-area">
+    <div class="logo-box" id="logoBox">BT</div>
+    <span class="logo-name">BuildTrack</span>
+    <div class="logo-tag">Construction Material Manager</div>
+  </div>
+  <div class="login-card" id="loginCard">
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button type="button" class="tab-btn active" id="staffTabBtn" onclick="switchTab('staff')">
+        <i class="bi bi-person-badge"></i> Staff Login
+      </button>
+      <button type="button" class="tab-btn admin-tab" id="adminTabBtn" onclick="switchTab('admin')">
+        <i class="bi bi-shield-lock"></i> Admin Panel
+      </button>
+    </div>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+      {% for m in messages %}
+        {% if m.tags == 'error' %}
+          <div class="alert-err"><i class="bi bi-exclamation-circle"></i>{{ m }}</div>
+        {% else %}
+          <div class="alert-msg"><i class="bi bi-check-circle"></i>{{ m }}</div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    <!-- ═══ STAFF LOGIN PANEL ═══ -->
+    <div class="panel active" id="staffPanel">
+      <h2>Welcome back</h2>
+      <p>Sign in to your staff workspace</p>
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="login_type" value="staff">
+        <div class="fg">
+          <label>Email Address</label>
+          <div class="iw"><i class="bi bi-envelope iw-icon"></i><input type="email" name="email" placeholder="you@company.com" required autocomplete="email"></div>
+        </div>
+        <div class="fg">
+          <label style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Password</span>
+            <a href="/forgot_password/" style="color:var(--accent); text-decoration:none; text-transform:none; letter-spacing:0; font-size:0.75rem;">Forgot Password?</a>
+          </label>
+          <div class="iw"><i class="bi bi-lock iw-icon"></i><input type="password" name="password" id="staffPwd" placeholder="••••••••" required><button type="button" class="eye-btn" onclick="togglePwd('staffPwd',this)"><i class="bi bi-eye-slash"></i></button></div>
+        </div>
+        <div class="captcha-box">
+          <label>Security Code</label>
+          <div class="captcha-row">
+            <img src="{{ captcha_image }}" alt="CAPTCHA" id="staffCaptchaImg">
+            <button type="button" class="captcha-refresh" onclick="refreshCaptcha('staffCaptchaImg')" title="Load new code"><i class="bi bi-arrow-clockwise"></i></button>
+          </div>
+          <div class="iw"><i class="bi bi-shield-check iw-icon"></i><input type="text" name="captcha" class="captcha-input" placeholder="Type the code above" required autocomplete="off" maxlength="6"></div>
+        </div>
+        <button type="submit" class="btn-login">Sign In &nbsp;<i class="bi bi-arrow-right"></i></button>
+      </form>
+      <div class="link-row">
+        New User? <a href="/insertuserregistration/">Register First</a>
+      </div>
+    </div>
+
+    <!-- ═══ ADMIN LOGIN PANEL ═══ -->
+    <div class="panel" id="adminPanel">
+      <h2><i class="bi bi-shield-lock" style="color:var(--admin);margin-right:.4rem;"></i>Admin Access</h2>
+      <p>Restricted area — admin credentials required</p>
+
+      <div class="admin-hint">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Admin login requires a <strong>Secret Key</strong> provided by the system administrator. Only authorized personnel should access this panel.</span>
+      </div>
+
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="login_type" value="admin">
+        <div class="fg">
+          <label>Admin Email</label>
+          <div class="iw"><i class="bi bi-envelope-at iw-icon"></i><input type="email" name="email" placeholder="admin@buildtrack.com" required autocomplete="email" class="admin-focus"></div>
+        </div>
+        <div class="fg">
+          <label>Password</label>
+          <div class="iw"><i class="bi bi-lock iw-icon"></i><input type="password" name="password" id="adminPwd" placeholder="••••••••" required class="admin-focus"><button type="button" class="eye-btn" onclick="togglePwd('adminPwd',this)"><i class="bi bi-eye-slash"></i></button></div>
+        </div>
+        <div class="fg">
+          <label style="color:#f87171;">Admin Secret Key</label>
+          <div class="iw"><i class="bi bi-key iw-icon" style="color:var(--admin);"></i><input type="password" name="admin_key" id="adminKey" placeholder="Enter admin secret key" required class="admin-focus"><button type="button" class="eye-btn" onclick="togglePwd('adminKey',this)"><i class="bi bi-eye-slash"></i></button></div>
+        </div>
+        <div class="captcha-box">
+          <label style="color:#f87171;">Security Code</label>
+          <div class="captcha-row">
+            <img src="{{ captcha_image }}" alt="CAPTCHA" id="adminCaptchaImg">
+            <button type="button" class="captcha-refresh" onclick="refreshCaptcha('adminCaptchaImg')" title="Load new code"><i class="bi bi-arrow-clockwise"></i></button>
+          </div>
+          <div class="iw"><i class="bi bi-shield-check iw-icon" style="color:var(--admin);"></i><input type="text" name="captcha" class="captcha-input admin-focus" placeholder="Type the code above" required autocomplete="off" maxlength="6"></div>
+        </div>
+        <button type="submit" class="btn-login btn-admin"><i class="bi bi-shield-check"></i>&nbsp; Admin Sign In</button>
+      </form>
+      <div class="link-row">
+        Staff member? <a href="#" onclick="switchTab('staff'); return false;">Switch to Staff Login</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  const staffBtn = document.getElementById('staffTabBtn');
+  const adminBtn = document.getElementById('adminTabBtn');
+  const staffPanel = document.getElementById('staffPanel');
+  const adminPanel = document.getElementById('adminPanel');
+  const loginCard = document.getElementById('loginCard');
+  const logoBox = document.getElementById('logoBox');
+  const glow = document.getElementById('glow');
+  const corners = [document.getElementById('c1'),document.getElementById('c2'),document.getElementById('c3'),document.getElementById('c4')];
+
+  if(tab === 'admin') {
+    staffBtn.classList.remove('active');
+    adminBtn.classList.add('active');
+    staffPanel.classList.remove('active');
+    adminPanel.classList.add('active');
+    loginCard.classList.add('admin-card');
+    logoBox.classList.add('admin-logo');
+    glow.classList.add('admin-glow');
+    corners.forEach(c => c.classList.add('admin-c'));
+  } else {
+    adminBtn.classList.remove('active');
+    staffBtn.classList.add('active');
+    adminPanel.classList.remove('active');
+    staffPanel.classList.add('active');
+    loginCard.classList.remove('admin-card');
+    logoBox.classList.remove('admin-logo');
+    glow.classList.remove('admin-glow');
+    corners.forEach(c => c.classList.remove('admin-c'));
+  }
+}
+
+function togglePwd(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  const icon = btn.querySelector('i');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.className = 'bi bi-eye';
+  } else {
+    inp.type = 'password';
+    icon.className = 'bi bi-eye-slash';
+  }
+}
+
+function refreshCaptcha(imgId) {
+  const btn = event.currentTarget;
+  btn.classList.add('spinning');
+  fetch('/refresh_captcha/')
+    .then(r => r.json())
+    .then(data => {
+      // Update both captcha images since they share the same session
+      document.getElementById('staffCaptchaImg').src = data.image;
+      document.getElementById('adminCaptchaImg').src = data.image;
+      btn.classList.remove('spinning');
+    })
+    .catch(() => { btn.classList.remove('spinning'); });
+}
+</script>
+</body>
+</html>

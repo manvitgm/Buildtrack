@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Deliveries{% endblock %}
+{% block page_title %}Deliveries{% endblock %}
+{% block nav_del %}active{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <form method="get" class="d-flex gap-2 align-items-center">
+    <select name="status" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.45rem .8rem;font-size:.84rem;">
+      <option value="">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="in_transit">In Transit</option>
+      <option value="delivered">Delivered</option>
+      <option value="failed">Failed</option>
+    </select>
+    <button type="submit" class="btn-o" style="padding:.43rem .9rem;">Filter</button>
+  </form>
+  <a href="/insertdelivery/" class="btn-y"><i class="bi bi-plus-lg"></i> Log Delivery</a>
+</div>
+
+<div class="card fu">
+  <div style="overflow-x:auto;">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Order</th>
+          <th>Delivery Date</th>
+          <th>Received By</th>
+          <th>Status</th>
+          <th>Note</th>
+          <th>Photo</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in deliveries %}
+        <tr>
+          <td style="color:#52525b;font-size:.8rem;">{{ forloop.counter }}</td>
+          <td>
+            <a href="/order_detail/{{ d.order.id }}/" style="color:var(--accent);text-decoration:none;font-weight:600;font-family:'Barlow Condensed',sans-serif;font-size:1rem;">
+              Order #{{ d.order.id }}
+            </a>
+          </td>
+          <td style="color:var(--muted);font-size:.84rem;">{{ d.delivery_date }}</td>
+          <td style="color:#52525b;font-size:.84rem;">{{ d.received_by|default:"—" }}</td>
+          <td>
+            {% if d.delivery_status == 'delivered' %}<span class="badge badge-green">Delivered</span>
+            {% elif d.delivery_status == 'in_transit' %}<span class="badge badge-purple">In Transit</span>
+            {% elif d.delivery_status == 'pending' %}<span class="badge badge-amber">Pending</span>
+            {% else %}<span class="badge badge-red">Failed</span>{% endif %}
+          </td>
+          <td style="color:var(--muted);font-size:.82rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ d.delivery_note|default:"—" }}</td>
+          <td>
+            {% if d.photo %}
+              <a href="{{ d.photo.url }}" target="_blank">
+                <img src="{{ d.photo.url }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border);">
+              </a>
+            {% else %}
+              <span style="color:#3f3f46;font-size:.78rem;">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="/editdelivery/{{ d.id }}/" class="btn-o" style="padding:.34rem .6rem;font-size:.8rem;"><i class="bi bi-pencil"></i></a>
+              <a href="/deldelivery/{{ d.id }}/" class="btn-r" style="padding:.34rem .6rem;font-size:.8rem;" onclick="return confirm('Delete this delivery record?')"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty"><i class="bi bi-truck"></i>No delivery records.<br><a href="/insertdelivery/" style="color:var(--accent);font-size:.84rem;">Log first delivery →</a></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

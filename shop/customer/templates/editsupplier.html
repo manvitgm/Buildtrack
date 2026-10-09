@@ -1,0 +1,99 @@
+<!-- templates/editsupplier.html -->
+{% extends 'base.html' %}
+
+{% block title %}Edit Supplier{% endblock %}
+{% block page_title %}Edit Supplier{% endblock %}
+{% block nav_sup %}active{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar mb-3">
+  <a href="/viewsupplier/" style="color:var(--text);text-decoration:none;">Suppliers</a> <span class="sep" style="color:var(--muted);margin:0 .5rem;">/</span> <span class="cur" style="color:var(--accent);">Edit Supplier</span>
+</div>
+
+<div class="card fu">
+    <div class="card-head">
+        <h5><i class="bi bi-building me-2" style="color:var(--accent)"></i>Edit Supplier</h5>
+    </div>
+
+    <div class="card-body-pad">
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Company Name *</label>
+                        <input type="text" name="company_name" class="f-ctrl" value="{{ x.company_name }}" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">User / Owner Name</label>
+                        <input type="text" name="user" class="f-ctrl" value="{{ x.user }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">GST Number</label>
+                        <input type="text" name="gst_number" class="f-ctrl" value="{{ x.gst_number }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Specialization</label>
+                        <input type="text" name="specialization" class="f-ctrl" value="{{ x.specialization }}">
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="f-group">
+                        <label class="f-label">Warehouse Address</label>
+                        <textarea name="warehouse_address" class="f-ctrl" rows="3">{{ x.warehouse_address }}</textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Rating (1-5)</label>
+                        <input type="number" min="1" max="5" name="rating" class="f-ctrl" value="{{ x.rating }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Logo</label>
+                        <input type="file" name="logo" class="f-ctrl" accept="image/*" style="padding:.4rem .85rem;">
+
+                        {% if x.logo %}
+                        <br>
+                        <img src="{{ x.logo.url }}" width="80">
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="divider">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn-y">
+                    <i class="bi bi-check-lg"></i>
+                    Update Supplier
+                </button>
+
+                <a href="/viewsupplier/" class="btn-o" style="padding:.5rem 1rem;border-radius:8px;border:1px solid var(--border);color:var(--text);text-decoration:none;">
+                    <i class="bi bi-x"></i> Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

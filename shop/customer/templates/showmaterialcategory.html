@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Material Categories{% endblock %}
+{% block page_title %}Material Categories{% endblock %}
+{% block nav_cat %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <div>
+      <h4 style="font-weight:700;">Material Categories</h4>
+      <p style="color:var(--muted);font-size:.85rem;">
+          {{ data|length }} categories available
+      </p>
+  </div>
+  {% if request.session.user_role == 'admin' %}
+  <a href="/insertmaterialcategory/" class="btn-y"><i class="bi bi-plus-lg"></i> Add Category</a>
+  {% endif %}
+</div>
+
+<div class="card fu">
+  <div style="overflow-x:auto;">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Category Name</th>
+          <th>Description</th>
+          <th>Parent Category ID</th>
+          {% if request.session.user_role == 'admin' %}
+          <th>Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in data %}
+        <tr>
+          <td style="font-weight:700;color:var(--text);">{{ cat.category_name }}</td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ cat.description|default:"-" }}</td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ cat.parent_category|default:"None" }}</td>
+          {% if request.session.user_role == 'admin' %}
+          <td>
+            <div class="d-flex gap-1">
+              <a href="/editmaterialcategory/{{ cat.id }}/" class="btn-o" style="padding:.34rem .6rem;font-size:.8rem;"><i class="bi bi-pencil"></i> Edit</a>
+              <a href="/delmaterialcategory/{{ cat.id }}/" class="btn-r" style="padding:.34rem .6rem;font-size:.8rem;" onclick="return confirm('Delete this category?')"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr><td colspan="4"><div class="empty"><i class="bi bi-tags"></i><br>No categories found.<br><br><a href="/insertmaterialcategory/" style="color:var(--accent);font-size:.84rem;">Add first category →</a></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

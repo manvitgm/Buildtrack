@@ -1,0 +1,86 @@
+<!-- templates/editpayment.html -->
+{% extends 'base.html' %}
+
+{% block title %}Edit Payment{% endblock %}
+{% block page_title %}Edit Payment{% endblock %}
+{% block nav_pay %}active{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-head">
+        <h5>Edit Payment</h5>
+    </div>
+
+    <div class="card-body-pad">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Order</label>
+                        <input type="text" name="t1" class="f-ctrl" value="{{ x.order }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Supplier</label>
+                        <input type="text" name="t2" class="f-ctrl" value="{{ x.supplier }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Amount</label>
+                        <input type="text" name="t3" class="f-ctrl" value="{{ x.amount }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Payment Method</label>
+                        <input type="text" name="t5" class="f-ctrl" value="{{ x.payment_method }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Transaction ID</label>
+                        <input type="text" name="t6" class="f-ctrl" value="{{ x.transaction_id }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label">Status</label>
+                        <input type="text" name="t7" class="f-ctrl" value="{{ x.status }}">
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="f-group">
+                        <label class="f-label">Payment Date</label>
+                        <input type="date" name="t4" class="f-ctrl" value="{{ x.payment_date|date:'Y-m-d' }}">
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn-y">
+                Update Payment
+            </button>
+
+            <a href="/viewpayment/" class="btn-o">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

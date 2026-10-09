@@ -1,0 +1,518 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Material Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand:      #e65c00;
+      --brand-dark: #c44e00;
+      --surface:    #f7f5f2;
+      --card-bg:    #ffffff;
+      --text:       #1a1a1a;
+      --muted:      #6b7280;
+      --border:     #e5e0d8;
+      --shadow:     0 2px 16px rgba(0,0,0,0.07);
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); }
+
+    /* NAV */
+    .top-nav { background:#1a1a1a; padding:14px 0; position:sticky; top:0; z-index:100; }
+    .top-nav .brand { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; color:var(--brand); text-decoration:none; }
+    .top-nav .brand span { color:var(--text); }
+    .top-nav a { color:var(--text); text-decoration:none; }
+
+    /* STEPS */
+    .steps-bar { background:#fff; border-bottom:1px solid var(--border); padding:16px 0; }
+    .step { display:flex; align-items:center; gap:8px; font-size:.85rem; font-weight:600; color:var(--muted); }
+    .step.active { color:var(--brand); }
+    .step.done   { color:#16a34a; }
+    .step-num {
+      width:26px; height:26px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.75rem; font-weight:800;
+      background:var(--border); color:var(--muted);
+    }
+    .step.active .step-num { background:var(--brand); color:var(--text); }
+    .step.done   .step-num { background:#16a34a; color:var(--text); }
+    .step-sep { flex:1; height:2px; background:var(--border); max-width:40px; }
+
+    /* PAGE HEADER */
+    .page-header { background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%); color:var(--text); padding:28px 0; margin-bottom:32px; }
+    .page-header h1 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.8rem; margin:0; }
+    .page-header .breadcrumb { margin:6px 0 0; opacity:.65; font-size:.85rem; }
+    .page-header .breadcrumb a { color:var(--brand); text-decoration:none; }
+
+    /* SECTION CARD */
+    .section-card {
+      background:var(--card-bg); border:1px solid var(--border);
+      border-radius:14px; padding:26px 28px; margin-bottom:22px;
+      box-shadow:var(--shadow);
+    }
+    .section-card h5 {
+      font-family:'Syne',sans-serif; font-weight:700;
+      font-size:.9rem; text-transform:uppercase; letter-spacing:.6px;
+      color:var(--muted); margin-bottom:18px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .section-card h5 i { color:var(--brand); font-size:1rem; }
+
+    /* FORM STYLES */
+    .form-label { font-weight:600; font-size:.87rem; margin-bottom:6px; }
+    .form-control, .form-select {
+      border:1.5px solid var(--border); border-radius:9px;
+      padding:10px 14px; font-size:.92rem;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color:var(--brand); box-shadow:0 0 0 3px rgba(230,92,0,.12);
+      outline:none;
+    }
+
+    /* PAYMENT METHOD CARDS */
+    .pay-options { display:flex; gap:12px; flex-wrap:wrap; }
+    .pay-option {
+      flex:1; min-width:130px;
+      border:2px solid var(--border); border-radius:12px;
+      padding:14px 12px; cursor:pointer;
+      transition:border-color .2s, background .2s;
+      text-align:center; position:relative;
+    }
+    .pay-option input[type=radio] {
+      position:absolute; opacity:0; width:0; height:0;
+    }
+    .pay-option:has(input:checked) {
+      border-color:var(--brand);
+      background:rgba(230,92,0,.06);
+    }
+    .pay-option .pay-icon { font-size:1.6rem; margin-bottom:6px; }
+    .pay-option .pay-label { font-size:.83rem; font-weight:600; color:var(--text); }
+    .pay-option .pay-sub { font-size:.72rem; color:var(--muted); }
+
+    /* ORDER REVIEW TABLE */
+    .review-table { width:100%; border-collapse:collapse; }
+    .review-table th {
+      text-align:left; font-size:.78rem; text-transform:uppercase;
+      letter-spacing:.5px; color:var(--muted); font-weight:700;
+      padding:8px 12px; background:var(--surface); border-radius:6px;
+    }
+    .review-table td { padding:10px 12px; font-size:.88rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .review-table tr:last-child td { border-bottom:none; }
+
+    /* SUPPLIER GROUP BADGE */
+    .supplier-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(230,92,0,.1); color:var(--brand);
+      border-radius:20px; padding:3px 10px; font-size:.78rem; font-weight:700;
+    }
+
+    /* SUMMARY STICKY */
+    .summary-card {
+      background:var(--card-bg); border:1px solid var(--border);
+      border-radius:14px; padding:24px; box-shadow:var(--shadow);
+      position:sticky; top:80px;
+    }
+    .summary-card h5 { font-family:'Syne',sans-serif; font-weight:700; font-size:.9rem; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:18px; }
+    .sum-row { display:flex; justify-content:space-between; padding:7px 0; font-size:.88rem; border-bottom:1px dashed var(--border); }
+    .sum-row:last-of-type { border-bottom:none; }
+    .total-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+    .total-amount { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:var(--brand); }
+
+    .btn-place {
+      background:var(--brand); color:var(--text); border:none;
+      border-radius:10px; padding:15px 20px; width:100%;
+      font-family:'Syne',sans-serif; font-weight:700; font-size:1rem;
+      cursor:pointer; transition:background .2s, transform .1s;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      margin-top:16px;
+    }
+    .btn-place:hover { background:var(--brand-dark); transform:translateY(-1px); }
+    .btn-place:active { transform:translateY(0); }
+
+    .security-note {
+      background:#f0fdf4; border:1px solid #bbf7d0;
+      border-radius:10px; padding:12px 14px; margin-top:14px;
+      font-size:.79rem; color:#166534;
+      display:flex; gap:8px; align-items:flex-start;
+    }
+
+    .info-box {
+      background:#fffbeb; border:1px solid #fde68a;
+      border-radius:10px; padding:12px 14px; margin-top:14px;
+      font-size:.8rem; color:#92400e;
+      display:flex; gap:8px; align-items:flex-start;
+    }
+
+    @media (max-width:768px) { .summary-card { position:static; margin-top:20px; } .pay-options { flex-direction:column; } }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a href="/dashboard/" class="brand">MATERIAL<span>HUB</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <a href="/viewcart/" class="text-white-50 small"><i class="bi bi-cart3 me-1"></i>Cart</a>
+      <a href="/viewmaterialorder/" class="text-white-50 small"><i class="bi bi-box-seam me-1"></i>Orders</a>
+    </div>
+  </div>
+</nav>
+
+<!-- STEPS BAR -->
+<div class="steps-bar">
+  <div class="container">
+    <div class="d-flex align-items-center gap-2">
+      <div class="step done">
+        <div class="step-num"><i class="bi bi-check"></i></div>
+        Cart
+      </div>
+      <div class="step-sep"></div>
+      <div class="step active">
+        <div class="step-num">2</div>
+        Checkout
+      </div>
+      <div class="step-sep"></div>
+      <div class="step">
+        <div class="step-num">3</div>
+        Confirmation
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/dashboard/">Dashboard</a> &rsaquo;
+      <a href="/viewcart/">Cart</a> &rsaquo;
+      Checkout
+    </div>
+    <h1><i class="bi bi-bag-check me-2"></i>Checkout</h1>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- MESSAGES -->
+  {% for msg in messages %}
+  <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} alert-dismissible fade show mb-4">
+    {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+
+  <form method="POST" action="/place_order/">
+    {% csrf_token %}
+    <div class="row g-4">
+
+      <!-- LEFT COLUMN -->
+      <div class="col-lg-8">
+
+        <!-- PROJECT SITE SELECTION -->
+        <div class="section-card">
+          <h5><i class="bi bi-geo-alt-fill"></i>Delivery — Project Site</h5>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Select Project Site *</label>
+              <select name="project_site" class="form-select" required>
+                <option value="">— Choose project site —</option>
+                {% for p in projects %}
+                  <option value="{{ p.id }}">{{ p.site_name }} — {{ p.location }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Expected Delivery (days)</label>
+              <select name="delivery_days" class="form-select">
+                <option value="3">3 days</option>
+                <option value="5" selected>5 days</option>
+                <option value="7">7 days</option>
+                <option value="10">10 days</option>
+              </select>
+            </div>
+          </div>
+          <div class="info-box mt-3">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Materials will be delivered to your selected project site. Inventory will be updated automatically on delivery confirmation.</span>
+          </div>
+        </div>
+
+        <!-- PAYMENT METHOD -->
+        <div class="section-card">
+          <h5><i class="bi bi-credit-card-2-front"></i>Payment Method</h5>
+          <div class="pay-options">
+            <label class="pay-option">
+              <input type="radio" name="payment_method" value="cod" checked>
+              <div class="pay-icon">💵</div>
+              <div class="pay-label">Cash on Delivery</div>
+              <div class="pay-sub">Pay when you receive</div>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="payment_method" value="upi">
+              <div class="pay-icon">📱</div>
+              <div class="pay-label">UPI</div>
+              <div class="pay-sub">GPay · PhonePe · Paytm</div>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="payment_method" value="bank">
+              <div class="pay-icon">🏦</div>
+              <div class="pay-label">Bank Transfer</div>
+              <div class="pay-sub">NEFT · RTGS · IMPS</div>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="payment_method" value="razorpay">
+              <div class="pay-icon">💳</div>
+              <div class="pay-label">Razorpay</div>
+              <div class="pay-sub">Credit / Debit Card</div>
+            </label>
+          </div>
+
+          <!-- ═══ DYNAMIC PAYMENT DETAIL PANELS ═══ -->
+
+          <!-- COD Panel -->
+          <div class="pay-detail-panel" id="panel-cod" style="margin-top:18px;">
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;display:flex;gap:10px;align-items:flex-start;">
+              <i class="bi bi-cash-coin" style="font-size:1.3rem;color:#16a34a;"></i>
+              <div>
+                <strong style="color:#166534;">No payment needed right now</strong>
+                <p style="margin:4px 0 0;font-size:.82rem;color:#166534;">You'll pay the delivery agent in cash when your materials arrive at the project site. A receipt will be generated automatically.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- UPI Panel -->
+          <div class="pay-detail-panel" id="panel-upi" style="margin-top:18px;display:none;">
+            <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:18px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                <i class="bi bi-phone" style="font-size:1.1rem;color:#7c3aed;"></i>
+                <strong style="color:#5b21b6;">Enter your UPI details</strong>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">UPI ID <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="upi_id" class="form-control" placeholder="yourname@upi / 9876543210@ybl" id="upi-id-input">
+                <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">Supports: Google Pay, PhonePe, Paytm, BHIM, or any UPI app</div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/220px-UPI-Logo-vector.svg.png" alt="UPI" style="height:22px;opacity:.7;">
+                <span style="font-size:.72rem;color:var(--muted);border-left:1px solid var(--border);padding-left:8px;">Payment request will be sent to your UPI app after placing order</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank Transfer Panel -->
+          <div class="pay-detail-panel" id="panel-bank" style="margin-top:18px;display:none;">
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                <i class="bi bi-bank" style="font-size:1.1rem;color:#2563eb;"></i>
+                <strong style="color:#1e40af;">Bank Transfer Details</strong>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Account Holder Name</label>
+                  <input type="text" name="bank_holder" class="form-control" placeholder="Full name as per bank">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Bank Name</label>
+                  <select name="bank_name" class="form-select">
+                    <option value="">— Select Bank —</option>
+                    <option>State Bank of India</option>
+                    <option>HDFC Bank</option>
+                    <option>ICICI Bank</option>
+                    <option>Axis Bank</option>
+                    <option>Punjab National Bank</option>
+                    <option>Bank of Baroda</option>
+                    <option>Kotak Mahindra Bank</option>
+                    <option>Yes Bank</option>
+                    <option>IndusInd Bank</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Account Number</label>
+                  <input type="text" name="bank_account" class="form-control" placeholder="Enter account number">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">IFSC Code</label>
+                  <input type="text" name="bank_ifsc" class="form-control" placeholder="e.g. SBIN0001234" style="text-transform:uppercase;">
+                </div>
+              </div>
+              <div style="font-size:.75rem;color:#1e40af;margin-top:12px;display:flex;gap:6px;align-items:flex-start;">
+                <i class="bi bi-info-circle"></i>
+                <span>Transfer will be initiated via NEFT/RTGS after order confirmation. Amount will be debited within 2–4 hours.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Razorpay / Card Panel -->
+          <div class="pay-detail-panel" id="panel-razorpay" style="margin-top:18px;display:none;">
+            <div style="background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:18px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                <i class="bi bi-credit-card-2-front" style="font-size:1.1rem;color:#d97706;"></i>
+                <strong style="color:#92400e;">Card / Wallet Payment via Razorpay</strong>
+              </div>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Card Number</label>
+                  <input type="text" name="card_number" class="form-control" placeholder="1234  5678  9012  3456" maxlength="19" id="card-num-input">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Expiry</label>
+                  <input type="text" name="card_expiry" class="form-control" placeholder="MM / YY" maxlength="7">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">CVV</label>
+                  <input type="password" name="card_cvv" class="form-control" placeholder="•••" maxlength="4">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Cardholder</label>
+                  <input type="text" name="card_name" class="form-control" placeholder="Name on card">
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">
+                <span style="font-size:.7rem;padding:3px 8px;border-radius:4px;background:#fff;border:1px solid #e5e7eb;font-weight:600;color:#1e40af;">VISA</span>
+                <span style="font-size:.7rem;padding:3px 8px;border-radius:4px;background:#fff;border:1px solid #e5e7eb;font-weight:600;color:#ea580c;">Mastercard</span>
+                <span style="font-size:.7rem;padding:3px 8px;border-radius:4px;background:#fff;border:1px solid #e5e7eb;font-weight:600;color:#0284c7;">RuPay</span>
+                <span style="font-size:.75rem;color:var(--muted);border-left:1px solid var(--border);padding-left:8px;">
+                  <i class="bi bi-lock-fill"></i> Secured by Razorpay
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ITEMS REVIEW -->
+        <div class="section-card">
+          <h5><i class="bi bi-list-check"></i>Review Your Items</h5>
+
+          {% for sup_data in supplier_totals %}
+          <div class="mb-3">
+            <div class="supplier-badge mb-2">
+              <i class="bi bi-building"></i>{{ sup_data.supplier.company_name }}
+            </div>
+            <table class="review-table">
+              <thead>
+                <tr>
+                  <th>Material</th>
+                  <th>Unit Price</th>
+                  <th>Qty</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cart_items %}
+                  {% if item.material.supplier.id == sup_data.supplier.id %}
+                  <tr>
+                    <td>
+                      <strong>{{ item.material.material_name }}</strong>
+                      <br><span style="font-size:.75rem;color:var(--muted)">{{ item.material.unit }}</span>
+                    </td>
+                    <td>₹{{ item.material.price }}</td>
+                    <td><span class="badge" style="background:#f0ebe3;color:var(--text);font-size:.82rem;">{{ item.quantity }}</span></td>
+                    <td><strong>₹{{ item.get_subtotal }}</strong></td>
+                  </tr>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+            <div class="text-end mt-1" style="font-size:.82rem;color:var(--muted);">
+              Supplier total: <strong style="color:var(--brand);">₹{{ sup_data.total }}</strong>
+              &nbsp;•&nbsp; Separate order will be created
+            </div>
+          </div>
+          {% endfor %}
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT: FINAL SUMMARY -->
+      <div class="col-lg-4">
+        <div class="summary-card">
+          <h5><i class="bi bi-receipt me-2"></i>Bill Summary</h5>
+
+          {% for item in cart_items %}
+          <div class="sum-row">
+            <span class="text-truncate" style="max-width:150px;">{{ item.material.material_name }} ×{{ item.quantity }}</span>
+            <span>₹{{ item.get_subtotal }}</span>
+          </div>
+          {% endfor %}
+
+          <div class="total-row">
+            <span style="font-family:'Syne',sans-serif;font-weight:700;">Grand Total</span>
+            <span class="total-amount">₹{{ grand_total }}</span>
+          </div>
+
+          <button type="submit" class="btn-place">
+            <i class="bi bi-bag-check-fill"></i>
+            Confirm & Place Order
+          </button>
+
+          <a href="/viewcart/" class="d-block text-center mt-3" style="color:var(--muted);font-size:.85rem;text-decoration:none;">
+            <i class="bi bi-arrow-left me-1"></i>Back to Cart
+          </a>
+
+          <div class="security-note">
+            <i class="bi bi-shield-fill-check"></i>
+            <div>
+              <strong>Auto-handled on order:</strong><br>
+              ✓ Unique tracking ID generated<br>
+              ✓ Stock updated instantly<br>
+              ✓ Inventory synced to site<br>
+              ✓ Payment record created<br>
+              ✓ You'll get a notification
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ═══ PAYMENT METHOD PANEL TOGGLE ═══
+  const panels = {
+    cod: document.getElementById('panel-cod'),
+    upi: document.getElementById('panel-upi'),
+    bank: document.getElementById('panel-bank'),
+    razorpay: document.getElementById('panel-razorpay')
+  };
+  const btnPlace = document.querySelector('.btn-place');
+  const btnLabels = {
+    cod: '<i class="bi bi-bag-check-fill"></i> Confirm & Place Order (Pay on Delivery)',
+    upi: '<i class="bi bi-phone"></i> Pay via UPI & Place Order',
+    bank: '<i class="bi bi-bank"></i> Confirm & Initiate Bank Transfer',
+    razorpay: '<i class="bi bi-credit-card-2-front"></i> Pay with Card & Place Order'
+  };
+
+  function showPanel(method) {
+    Object.values(panels).forEach(p => { if(p) p.style.display = 'none'; });
+    if(panels[method]) panels[method].style.display = 'block';
+    if(btnPlace && btnLabels[method]) btnPlace.innerHTML = btnLabels[method];
+  }
+
+  document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', (e) => showPanel(e.target.value));
+  });
+
+  // ═══ CARD NUMBER FORMATTING (add spaces every 4 digits) ═══
+  const cardInput = document.getElementById('card-num-input');
+  if(cardInput) {
+    cardInput.addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\s/g,'').replace(/\D/g,'');
+      let formatted = v.match(/.{1,4}/g);
+      e.target.value = formatted ? formatted.join('  ') : '';
+    });
+  }
+</script>
+</body>
+</html>

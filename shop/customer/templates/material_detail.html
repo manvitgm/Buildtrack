@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}{{ mat.material_name }}{% endblock %}
+{% block page_title %}Material Details{% endblock %}
+{% block nav_mat %}active{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+  <a href="/viewmaterial/">Materials</a><span class="sep">/</span><span class="cur">{{ mat.material_name }}</span>
+</div>
+
+<div class="row g-4 mt-2">
+  <div class="col-lg-5">
+    <div class="card fu h-100" style="padding:1.5rem;text-align:center;display:flex;align-items:center;justify-content:center;">
+      {% if mat.photo %}
+        <img src="{{ mat.photo.url }}" style="max-width:100%;max-height:400px;border-radius:12px;border:1px solid var(--border);object-fit:contain;">
+      {% else %}
+        <div style="background:var(--bg);width:100%;height:300px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">
+          <i class="bi bi-box-seam" style="font-size:4rem;color:var(--muted);"></i>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card fu" style="padding:2.5rem 2rem;">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h2 style="font-family:'Barlow Condensed',sans-serif;font-weight:800;margin-bottom:.3rem;font-size:2.2rem;">{{ mat.material_name }}</h2>
+          <span style="background:rgba(255,229,0,.12);color:#ffe500;padding:.3rem .65rem;border-radius:30px;font-size:.75rem;font-weight:700;display:inline-block;margin-bottom:1rem;">{{ mat.material_code }}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Price</div>
+          <div style="font-size:2rem;font-weight:800;color:var(--accent);">₹{{ mat.price }}</div>
+        </div>
+      </div>
+
+      <div style="font-size:1rem;color:var(--muted);margin-bottom:2rem;line-height:1.7;">
+        {{ mat.description|default:"No description provided." }}
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6">
+          <div style="padding:1.2rem;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.5px;">Category</div>
+            <div style="font-weight:600;font-size:1.05rem;">{{ mat.category }}</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div style="padding:1.2rem;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.5px;">Stock</div>
+            <div style="font-weight:600;font-size:1.05rem;">{{ mat.stock_quantity }} {{ mat.unit }}</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div style="padding:1.2rem;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.5px;">Quality</div>
+            <div style="font-weight:600;font-size:1.05rem;text-transform:capitalize;">
+              {% if mat.quality_status == 'good' %}<span style="color:#34d399;"><i class="bi bi-check-circle"></i> Good</span>
+              {% elif mat.quality_status == 'average' %}<span style="color:#fbbf24;"><i class="bi bi-exclamation-circle"></i> Average</span>
+              {% else %}<span style="color:#f87171;"><i class="bi bi-x-circle"></i> Poor</span>{% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div style="padding:1.2rem;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.5px;">Supplier</div>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              {% if mat.supplier.logo %}
+                <img src="{{ mat.supplier.logo.url }}" style="width:42px;height:42px;border-radius:10px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;">
+              {% else %}
+                <div style="width:42px;height:42px;border-radius:10px;background:rgba(245,158,11,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(245,158,11,.15);">
+                  <i class="bi bi-building" style="color:#f59e0b;font-size:1.1rem;"></i>
+                </div>
+              {% endif %}
+              <div>
+                <div style="font-weight:700;font-size:1.05rem;line-height:1.2;">{{ mat.supplier.company_name }}</div>
+                {% if mat.supplier.rating %}
+                <div style="font-size:.75rem;color:#f59e0b;margin-top:.15rem;">
+                  <i class="bi bi-star-fill"></i> {{ mat.supplier.rating }}/5
+                  {% if mat.supplier.specialization %}<span style="color:var(--muted);margin-left:.4rem;">· {{ mat.supplier.specialization }}</span>{% endif %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if mat.stock_quantity and mat.stock_quantity > 0 %}
+      <div style="padding:1.5rem;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;">
+        <form method="POST" action="/add_to_cart/{{ mat.id }}/" class="d-flex gap-3 align-items-center flex-wrap">
+          {% csrf_token %}
+          <div style="display:flex;align-items:center;gap:.7rem;">
+            <label style="font-size:.85rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;">Qty</label>
+            <input type="number" name="qty" value="1" min="1" max="{{ mat.stock_quantity }}" 
+            style="width:80px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:.6rem;text-align:center;font-size:1.1rem;font-weight:700;">
+          </div>
+          <button type="submit" class="btn-o" style="padding:.65rem 1.5rem;font-size:.95rem;flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+            <i class="bi bi-cart-plus"></i> Add to Cart
+          </button>
+          <button type="submit" formaction="/buy_now/{{ mat.id }}/" class="btn-y" style="padding:.65rem 1.5rem;font-size:.95rem;flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+            <i class="bi bi-lightning-charge"></i> Order Now
+          </button>
+        </form>
+      </div>
+      {% else %}
+      <div style="padding:1.2rem;border-radius:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:#f87171;font-weight:600;text-align:center;font-size:1.05rem;">
+        <i class="bi bi-exclamation-triangle"></i> This item is currently out of stock.
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

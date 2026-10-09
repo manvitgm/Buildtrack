@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dash %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Dashboard Specific Styles */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1100px) { .dash-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .dash-grid { grid-template-columns: 1fr; } }
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.stat-card .icon {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    font-size: 1.75rem;
+    opacity: 0.15;
+    transition: opacity 0.3s;
+}
+
+.stat-card:hover .icon { opacity: 0.3; }
+
+.stat-card .label {
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.stat-card .trend {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.trend.up { color: var(--accent-g); }
+.trend.down { color: var(--accent-r); }
+.trend.neutral { color: var(--accent-b); }
+
+/* Main content grid */
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+@media (max-width: 992px) { .main-grid { grid-template-columns: 1fr; } }
+
+.chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.chart-container {
+    height: 250px;
+    width: 100%;
+}
+
+/* Recent Orders List */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.activity-item:hover { background: rgba(255, 255, 255, 0.05); color: inherit; }
+
+.act-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.act-icon.placed { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.act-icon.delivered { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.act-icon.processing { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.act-icon.cancelled { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+.act-content { flex: 1; }
+.act-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.1rem; }
+.act-meta { font-size: 0.75rem; color: var(--muted); }
+.act-amount { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-qa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-qa i { font-size: 1.5rem; color: var(--accent); }
+.btn-qa:hover { background: var(--bg-card); border-color: var(--accent); color: var(--text); transform: translateY(-2px); }
+
+/* Status Badges */
+.badge-soft {
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.b-placed { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+.b-delivered { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+.b-processing { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+.b-cancelled { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header Welcome -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 style="font-weight:700; margin:0;">
+            Welcome back, {% if request.session.uname %}{{ request.session.uname }}{% else %}Administrator{% endif %}! 👋
+        </h3>
+        <p style="color:var(--muted); font-size:0.85rem; margin-top:0.25rem;">Here is what's happening with your projects today.</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if is_admin %}
+            <a href="/insertmaterial/" class="btn-y"><i class="bi bi-plus-lg"></i> Add Material</a>
+        {% else %}
+            <a href="/viewmaterial/" class="btn-y"><i class="bi bi-search"></i> Browse Materials</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="dash-grid">
+    <div class="stat-card">
+        <i class="bi bi-wallet2 icon text-warning"></i>
+        <div class="label">Total {% if is_admin %}Revenue{% else %}Spend{% endif %}</div>
+        <div class="value">₹{{ total_revenue|default:"0" }}</div>
+        <div class="trend up"><i class="bi bi-graph-up-arrow"></i> +12.5% from last month</div>
+    </div>
+    <div class="stat-card">
+        <i class="bi bi-box-seam icon text-primary"></i>
+        <div class="label">Total Orders</div>
+        <div class="value">{{ total_orders }}</div>
+        <div class="trend neutral"><i class="bi bi-dash"></i> Consistent volume</div>
+    </div>
+    <div class="stat-card">
+        <i class="bi bi-hourglass-split icon text-info"></i>
+        <div class="label">Pending Orders</div>
+        <div class="value">{{ pending_orders }}</div>
+        <div class="trend up"><i class="bi bi-arrow-up-right"></i> Needs attention</div>
+    </div>
+    <div class="stat-card">
+        <i class="bi bi-check-circle icon text-success"></i>
+        <div class="label">Completed Orders</div>
+        <div class="value">{{ completed_orders }}</div>
+        <div class="trend up"><i class="bi bi-graph-up"></i> +4 this week</div>
+    </div>
+</div>
+
+<div class="main-grid">
+    <!-- Left Column: Charts & Tables -->
+    <div class="d-flex flex-column gap-4">
+        
+        <!-- Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h5 class="chart-title"><i class="bi bi-bar-chart-line text-warning me-2"></i>{% if is_admin %}Revenue{% else %}Spend{% endif %} Overview (Last 7 Days)</h5>
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Low Stock Alerts (Admin only) or Quick Catalog -->
+        {% if is_admin %}
+            <div class="card">
+                <div class="card-head">
+                    <h5><i class="bi bi-exclamation-triangle text-danger me-2"></i>Low Stock Alerts</h5>
+                    <a href="/viewinventory/" style="font-size:0.8rem; color:var(--accent); text-decoration:none;">View All</a>
+                </div>
+                <div class="card-body-pad">
+                    {% if low_stock %}
+                        <div class="table-responsive">
+                            <table class="tbl mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Material Name</th>
+                                        <th>Code</th>
+                                        <th>Stock Left</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in low_stock %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if item.photo %}
+                                                    <img src="{{ item.photo.url }}" style="width:28px;height:28px;border-radius:4px;object-fit:cover;">
+                                                {% else %}
+                                                    <div style="width:28px;height:28px;border-radius:4px;background:#2a2a35;display:flex;align-items:center;justify-content:center;font-size:0.7rem;"><i class="bi bi-image"></i></div>
+                                                {% endif %}
+                                                <span style="font-weight:600;">{{ item.material_name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-muted" style="font-size:0.8rem;">{{ item.material_code }}</td>
+                                        <td><span class="badge bg-danger rounded-pill px-2 py-1">{{ item.stock_quantity }} {{ item.unit }}</span></td>
+                                        <td><a href="/editmaterial/{{ item.id }}/" class="btn-b py-1 px-2" style="font-size:0.7rem;">Update</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-check-circle display-4 d-block mb-2 text-success" style="opacity:0.5;"></i>
+                            <p class="mb-0">All stock levels are healthy.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Recent Activity & Quick Actions -->
+    <div>
+        
+        <!-- Quick Actions -->
+        <h6 style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:0.75rem; font-weight:700;">Quick Actions</h6>
+        <div class="quick-actions">
+            {% if is_admin %}
+                <a href="/insertprojectsite/" class="btn-qa"><i class="bi bi-map"></i>New Site</a>
+                <a href="/insertsupplier/" class="btn-qa"><i class="bi bi-building"></i>Add Supplier</a>
+            {% else %}
+                <a href="/viewcart/" class="btn-qa"><i class="bi bi-cart3"></i>View Cart</a>
+                <a href="/viewmaterialorder/" class="btn-qa"><i class="bi bi-bag-check"></i>My Orders</a>
+            {% endif %}
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="chart-card mb-4">
+            <div class="chart-header">
+                <h5 class="chart-title"><i class="bi bi-clock-history text-primary me-2"></i>Recent Orders</h5>
+                <a href="/viewmaterialorder/" style="font-size:0.8rem; color:var(--accent); text-decoration:none;">View All</a>
+            </div>
+            
+            <div class="activity-list">
+                {% for o in recent_orders %}
+                <a href="/order_detail/{{ o.id }}/" class="activity-item">
+                    <div class="act-icon 
+                        {% if o.order_status == 'placed' %}placed
+                        {% elif o.order_status == 'delivered' %}delivered
+                        {% elif o.order_status == 'cancelled' %}cancelled
+                        {% else %}processing{% endif %}">
+                        {% if o.order_status == 'placed' %}<i class="bi bi-cart-check"></i>
+                        {% elif o.order_status == 'delivered' %}<i class="bi bi-box-seam"></i>
+                        {% elif o.order_status == 'cancelled' %}<i class="bi bi-x-circle"></i>
+                        {% else %}<i class="bi bi-arrow-repeat"></i>{% endif %}
+                    </div>
+                    <div class="act-content">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="act-title">Order #{{ o.id }}</div>
+                            <div class="act-amount">₹{{ o.total_amount }}</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <div class="act-meta">
+                                {% if is_admin %}By {{ o.ordered_by.name|default:"User" }} • {% endif %}
+                                {{ o.expected_delivery_date|date:"d M Y" }}
+                            </div>
+                            <span class="badge-soft b-{{ o.order_status|default:'placed' }}">{{ o.order_status|title }}</span>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox display-4 d-block mb-2" style="opacity:0.2;"></i>
+                    <p class="mb-0">No recent orders found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inject mock data from Django view
+    const labels = {{ chart_labels|safe }};
+    const revenueData = {{ revenue_chart_data|safe }};
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    
+    // Create gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(245, 158, 11, 0.4)'); // accent color with opacity
+    gradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Amount (₹)',
+                data: revenueData,
+                borderColor: '#f59e0b', // var(--accent)
+                backgroundColor: gradient,
+                borderWidth: 3,
+                pointBackgroundColor: '#111115',
+                pointBorderColor: '#f59e0b',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4 // curve
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 17, 21, 0.9)',
+                    titleColor: '#a1a1aa',
+                    bodyColor: '#fff',
+                    borderColor: '#1f1f28',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return '₹' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                    ticks: { color: '#a1a1aa', font: { family: "'Barlow', sans-serif" } }
+                },
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { color: '#a1a1aa', font: { family: "'Barlow', sans-serif" } }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+        }
+    });
+});
+</script>
+{% endblock %}

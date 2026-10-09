@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register | BuildTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root{--bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--accent:#f59e0b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow-x:hidden;padding:2rem 0;}
+/* grid bg */
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(245,158,11,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.03) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+.glow{position:fixed;width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+/* wrap */
+.wrap{position:relative;z-index:1;width:100%;max-width:550px;padding:1.5rem;}
+/* logo */
+.logo-area{text-align:center;margin-bottom:2rem;}
+.logo-box{width:54px;height:54px;background:var(--accent);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4rem;color:#000;margin-bottom:.75rem;box-shadow:0 0 30px rgba(245,158,11,.25);}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-size:1.9rem;font-weight:800;color:#0f172a;letter-spacing:1px;display:block;}
+.logo-tag{font-size:.65rem;color:#94a3b8;letter-spacing:3px;text-transform:uppercase;}
+/* card */
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;}
+.login-card h2{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;color:#0f172a;margin-bottom:.2rem;}
+.login-card p{font-size:.83rem;color:#94a3b8;margin-bottom:1.4rem;}
+/* form */
+.fg{margin-bottom:1rem;}
+.row-fg{display:flex;gap:1rem;}
+.row-fg .fg{flex:1;}
+label{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;margin-bottom:.35rem;display:block;}
+.iw{position:relative;}
+.iw i.iw-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.88rem;pointer-events:none;}
+input, select{width:100%;background:#ffffff;border:1px solid var(--border);color:#0f172a;border-radius:8px;padding:.58rem 2.5rem .58rem 2.3rem;font-size:.9rem;font-family:'Barlow',sans-serif;transition:border .2s;appearance:none;}
+.eye-btn{position:absolute;right:.65rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;padding:.15rem;font-size:1rem;transition:color .2s;z-index:2;display:flex;align-items:center;}
+.eye-btn:hover{color:#64748b;}
+select{padding-left:.85rem;} /* No icon offset for select */
+input:focus, select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+.btn-login{width:100%;background:var(--accent);color:#000;border:none;border-radius:8px;padding:.65rem;font-size:.95rem;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;margin-top:.25rem;transition:all .2s;letter-spacing:.3px;}
+.btn-login:hover{background:#d97706;transform:translateY(-1px);box-shadow:0 4px 16px rgba(245,158,11,.25);}
+.link-row{text-align:center;margin-top:1.1rem;font-size:.83rem;color:#94a3b8;}
+.link-row a{color:var(--accent);text-decoration:none;font-weight:600;}
+.alert-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:8px;padding:.6rem .85rem;font-size:.83rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+
+/* Password Hint */
+.pwd-hints{margin-top:.4rem;font-size:.7rem;color:var(--muted);}
+.pwd-hints ul{list-style:none;padding:0;margin:0;}
+.pwd-hints li{display:flex;align-items:center;gap:.3rem;margin-bottom:.15rem;transition:color .2s;}
+.pwd-hints li i{font-size:.8rem;}
+.pwd-hints li.valid{color:#10b981;}
+.pwd-hints li.invalid{color:#ef4444;}
+/* CAPTCHA */
+.captcha-box{margin:1rem 0 .5rem;}
+.captcha-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;}
+.captcha-row img{border-radius:8px;border:1px solid #cbd5e1;height:50px;flex-shrink:0;}
+.captcha-refresh{background:none;border:1px solid var(--border);color:#64748b;border-radius:8px;width:40px;height:50px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;font-size:1.1rem;}
+.captcha-refresh:hover{border-color:var(--accent);color:var(--accent);background:rgba(245,158,11,.06);}
+.captcha-refresh.spinning i{animation:spin .6s ease;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+input.captcha-input{padding-left:.85rem;letter-spacing:4px;font-weight:700;font-size:1rem;text-transform:uppercase;}
+@media(max-width: 600px) { .row-fg { flex-direction:column; gap:0; } }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow"></div>
+<div class="wrap">
+  <div class="logo-area">
+    <div class="logo-box">BT</div>
+    <span class="logo-name">BuildTrack</span>
+    <div class="logo-tag">Construction Material Manager</div>
+  </div>
+  <div class="login-card">
+    <h2>Create an Account</h2>
+    <p>Join the workspace to manage materials.</p>
+    {% if messages %}{% for m in messages %}<div class="alert-err"><i class="bi bi-exclamation-circle"></i>{{ m }}</div>{% endfor %}{% endif %}
+    <form method="post" id="regForm">{% csrf_token %}
+      
+      <div class="row-fg">
+        <div class="fg">
+          <label>Full Name</label>
+          <div class="iw"><i class="bi bi-person iw-icon"></i><input type="text" name="name" placeholder="John Doe" required></div>
+        </div>
+        <div class="fg">
+          <label>Email Address</label>
+          <div class="iw"><i class="bi bi-envelope iw-icon"></i><input type="email" name="email" placeholder="you@company.com" required></div>
+        </div>
+      </div>
+
+      <div class="row-fg">
+        <div class="fg">
+          <label>Contact Number</label>
+          <div class="iw"><i class="bi bi-telephone iw-icon"></i><input type="text" name="contact" placeholder="10-digit Phone Number" pattern="\d{10}" maxlength="10" title="Contact number must be exactly 10 digits (numbers only)" required></div>
+        </div>
+        <div class="fg">
+          <label>City</label>
+          <div class="iw"><i class="bi bi-buildings iw-icon"></i><input type="text" name="city" placeholder="New York" pattern="[A-Za-z\s]+" title="City must contain letters and spaces only" required></div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Role</label>
+        <select name="role" required id="roleSelect">
+            <option value="staff">Staff</option>
+            <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="fg" id="staffRoleGroup">
+        <label>Staff Designation</label>
+        <select name="staff_role" id="staffRoleSelect">
+            <option value="Manager">Manager</option>
+            <option value="Engineer">Engineer</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Clerk">Clerk</option>
+            <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- Admin Secret Key (hidden by default) -->
+      <div class="fg" id="adminKeyGroup" style="display:none;">
+        <label style="color:#f87171;">Admin Secret Key</label>
+        <div class="iw"><i class="bi bi-key iw-icon" style="color:#ef4444;"></i><input type="password" name="admin_key" id="adminKeyInput" placeholder="Enter admin authorization key" style="border-color:rgba(239,68,68,.3);"><button type="button" class="eye-btn" onclick="togglePwd('adminKeyInput',this)"><i class="bi bi-eye-slash"></i></button></div>
+        <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:6px;padding:.5rem .7rem;margin-top:.4rem;font-size:.72rem;color:#fca5a5;display:flex;align-items:flex-start;gap:.4rem;">
+          <i class="bi bi-shield-exclamation" style="color:#ef4444;margin-top:1px;"></i>
+          <span>Admin registration requires a secret key from your system administrator. Unauthorized attempts will be rejected.</span>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Password</label>
+        <div class="iw"><i class="bi bi-lock iw-icon"></i><input type="password" name="password" id="password" placeholder="Create a strong password" required><button type="button" class="eye-btn" onclick="togglePwd('password',this)"><i class="bi bi-eye-slash"></i></button></div>
+        <div class="pwd-hints">
+            <ul id="pwd-rules">
+                <li id="rule-len" class="invalid"><i class="bi bi-x-circle"></i> At least 8 characters</li>
+                <li id="rule-upper" class="invalid"><i class="bi bi-x-circle"></i> Uppercase & lowercase letter</li>
+                <li id="rule-num" class="invalid"><i class="bi bi-x-circle"></i> At least one number</li>
+                <li id="rule-spec" class="invalid"><i class="bi bi-x-circle"></i> Special character (!@#$%^&*)</li>
+            </ul>
+        </div>
+      </div>
+
+      <div class="captcha-box">
+        <label>Security Code</label>
+        <div class="captcha-row">
+          <img src="{{ captcha_image }}" alt="CAPTCHA" id="regCaptchaImg">
+          <button type="button" class="captcha-refresh" onclick="refreshCaptcha()" title="Load new code"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+        <div class="iw"><i class="bi bi-shield-check iw-icon"></i><input type="text" name="captcha" class="captcha-input" placeholder="Type the code above" required autocomplete="off" maxlength="6"></div>
+      </div>
+
+      <button type="submit" class="btn-login" id="submitBtn" disabled>Create Account &nbsp;<i class="bi bi-person-plus"></i></button>
+    </form>
+    <div class="link-row">
+      Already have an account? <a href="/insertlogin/">Sign In</a>
+    </div>
+  </div>
+</div>
+
+<script>
+    const pwdInput = document.getElementById('password');
+    const btn = document.getElementById('submitBtn');
+    const rules = {
+        len: document.getElementById('rule-len'),
+        upper: document.getElementById('rule-upper'),
+        num: document.getElementById('rule-num'),
+        spec: document.getElementById('rule-spec')
+    };
+
+    function updateRule(elem, isValid) {
+        if(isValid) {
+            elem.classList.remove('invalid');
+            elem.classList.add('valid');
+            elem.innerHTML = '<i class="bi bi-check-circle-fill"></i> ' + elem.innerText.trim();
+        } else {
+            elem.classList.remove('valid');
+            elem.classList.add('invalid');
+            elem.innerHTML = '<i class="bi bi-x-circle"></i> ' + elem.innerText.trim();
+        }
+    }
+
+    pwdInput.addEventListener('input', function(e) {
+        const val = e.target.value;
+        const vLen = val.length >= 8;
+        const vUpper = /[A-Z]/.test(val) && /[a-z]/.test(val);
+        const vNum = /[0-9]/.test(val);
+        const vSpec = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+
+        updateRule(rules.len, vLen);
+        updateRule(rules.upper, vUpper);
+        updateRule(rules.num, vNum);
+        updateRule(rules.spec, vSpec);
+
+        if(vLen && vUpper && vNum && vSpec) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+    });
+
+    // ═══ ROLE SELECT → SHOW/HIDE ADMIN KEY ═══
+    const roleSelect = document.getElementById('roleSelect');
+    const adminKeyGroup = document.getElementById('adminKeyGroup');
+    const adminKeyInput = document.getElementById('adminKeyInput');
+    const staffRoleGroup = document.getElementById('staffRoleGroup');
+    const staffRoleSelect = document.getElementById('staffRoleSelect');
+
+    if(roleSelect) {
+        roleSelect.addEventListener('change', function() {
+            if(this.value === 'admin') {
+                adminKeyGroup.style.display = 'block';
+                adminKeyInput.required = true;
+                staffRoleGroup.style.display = 'none';
+                staffRoleSelect.required = false;
+            } else {
+                adminKeyGroup.style.display = 'none';
+                adminKeyInput.required = false;
+                adminKeyInput.value = '';
+                staffRoleGroup.style.display = 'block';
+                staffRoleSelect.required = true;
+            }
+        });
+        roleSelect.dispatchEvent(new Event('change'));
+    }
+
+    function togglePwd(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      const icon = btn.querySelector('i');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'bi bi-eye';
+      } else {
+        inp.type = 'password';
+        icon.className = 'bi bi-eye-slash';
+      }
+    }
+
+    function refreshCaptcha() {
+      const btn = event.currentTarget;
+      btn.classList.add('spinning');
+      fetch('/refresh_captcha/')
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('regCaptchaImg').src = data.image;
+          btn.classList.remove('spinning');
+        })
+        .catch(() => { btn.classList.remove('spinning'); });
+    }
+</script>
+</body>
+</html>

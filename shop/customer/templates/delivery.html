@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Log Delivery{% endblock %}
+{% block page_title %}Deliveries{% endblock %}
+{% block nav_del %}active{% endblock %}
+{% block content %}
+<div class="breadcrumb-bar">
+  <a href="/viewdelivery/">Deliveries</a><span class="sep">/</span><span class="cur">Log Delivery</span>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card fu">
+      <div class="card-head">
+        <h5><i class="bi bi-truck me-2" style="color:var(--accent)"></i>Delivery Details</h5>
+      </div>
+      <div class="card-body-pad">
+        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="f-label">Order *</label>
+              <select class="f-ctrl" name="order" required>
+                <option value="">— Select Order —</option>
+                {% for o in orders %}
+                <option value="{{ o.id }}">Order #{{ o.id }} — {{ o.supplier }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Delivery Date *</label>
+              <input class="f-ctrl" type="date" name="delivery_date" value="{{ today }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Received By</label>
+              <select class="f-ctrl" name="received_by">
+                <option value="">— Select User —</option>
+                {% for u in users %}
+                <option value="{{ u.id }}">{{ u.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="f-label">Delivery Status *</label>
+              <select class="f-ctrl" name="delivery_status" required>
+                <option value="pending">⏳ Pending</option>
+                <option value="in_transit">🚚 In Transit</option>
+                <option value="delivered">✅ Delivered</option>
+                <option value="failed">❌ Failed</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="f-label">Delivery Note</label>
+              <textarea class="f-ctrl" name="delivery_note" rows="3" placeholder="Condition of goods, remarks, partial delivery notes…"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="f-label">Proof / Photo</label>
+              <input class="f-ctrl" type="file" name="photo" accept="image/*" style="padding:.4rem .85rem;">
+              <div style="font-size:.72rem;color:#52525b;margin-top:.3rem;">Upload delivery receipt, gate pass or photo of received goods</div>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-y"><i class="bi bi-check-lg"></i> Log Delivery</button>
+            <a href="/viewdelivery/" class="btn-o"><i class="bi bi-x"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <!-- Status guide -->
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head"><h5><i class="bi bi-info-circle me-2" style="color:var(--accent-b)"></i>Status Guide</h5></div>
+      <div class="card-body-pad">
+        <div style="display:flex;flex-direction:column;gap:.7rem;">
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;background:rgba(245,158,11,.06);border-radius:8px;border:1px solid rgba(245,158,11,.15);">
+            <span style="font-size:1.1rem;">⏳</span>
+            <div><div style="font-size:.84rem;font-weight:600;color:#fbbf24;">Pending</div><div style="font-size:.76rem;color:#52525b;">Order accepted, awaiting dispatch</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;background:rgba(139,92,246,.06);border-radius:8px;border:1px solid rgba(139,92,246,.15);">
+            <span style="font-size:1.1rem;">🚚</span>
+            <div><div style="font-size:.84rem;font-weight:600;color:#a78bfa;">In Transit</div><div style="font-size:.76rem;color:#52525b;">Goods dispatched, on the way</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;background:rgba(16,185,129,.06);border-radius:8px;border:1px solid rgba(16,185,129,.15);">
+            <span style="font-size:1.1rem;">✅</span>
+            <div><div style="font-size:.84rem;font-weight:600;color:#34d399;">Delivered</div><div style="font-size:.76rem;color:#52525b;">Successfully received at site</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;background:rgba(239,68,68,.06);border-radius:8px;border:1px solid rgba(239,68,68,.15);">
+            <span style="font-size:1.1rem;">❌</span>
+            <div><div style="font-size:.84rem;font-weight:600;color:#f87171;">Failed</div><div style="font-size:.76rem;color:#52525b;">Delivery attempt failed or rejected</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

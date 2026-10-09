@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+{% block title %}Add Order Item{% endblock %}
+{% block page_title %}Order Items{% endblock %}
+{% block nav_oi %}active{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar">
+  <a href="/vieworderitem/">Order Items</a>
+  <span class="sep">/</span>
+  <span class="cur">Add Item</span>
+</div>
+
+<div class="row g-3">
+
+  <!-- LEFT -->
+
+  <div class="col-lg-7">
+
+    <div class="card fu">
+
+      <div class="card-head">
+        <h5>
+          <i class="bi bi-list-ul me-2" style="color:var(--accent)"></i>
+          Add Item to Order
+        </h5>
+      </div>
+
+      <div class="card-body-pad">
+
+        <form method="post">
+
+          {% csrf_token %}
+
+          <div class="row g-3">
+
+            <!-- ORDER -->
+
+            <div class="col-12">
+
+              <label class="f-label">Order *</label>
+
+              <select class="f-ctrl" name="order" id="orderSel" required>
+
+                <option value="">— Select Order —</option>
+
+                {% for o in orders %}
+
+                <option value="{{ o.id }}">
+
+                  Order #{{ o.id }}
+
+                </option>
+
+                {% endfor %}
+
+              </select>
+
+            </div>
+
+            <!-- MATERIAL -->
+
+            <div class="col-12">
+
+              <label class="f-label">Material *</label>
+
+              <select
+                class="f-ctrl"
+                name="material"
+                id="matSel"
+                required
+                onchange="loadMaterialPrice(this)"
+              >
+
+                <option value="">— Select Material —</option>
+
+                {% for m in materials %}
+
+                <option
+                  value="{{ m.id }}"
+                  data-price="{{ m.price }}"
+                  data-unit="{{ m.unit }}"
+                >
+
+                  {{ m.material_name }} —
+                  ₹{{ m.price }}/{{ m.unit }}
+
+                </option>
+
+                {% endfor %}
+
+              </select>
+
+            </div>
+
+            <!-- QUANTITY -->
+
+            <div class="col-md-4">
+
+              <label class="f-label">Quantity *</label>
+
+              <input
+                class="f-ctrl"
+                type="number"
+                step="1"
+                min="1"
+                name="quantity"
+                id="qty"
+                placeholder="0"
+                required
+                onchange="calcTotal()"
+              >
+
+            </div>
+
+            <!-- UNIT PRICE -->
+
+            <div class="col-md-4">
+
+              <label class="f-label">Unit Price (₹) *</label>
+
+              <input
+                class="f-ctrl"
+                type="number"
+                step="0.01"
+                name="unit_price"
+                id="uprice"
+                placeholder="0.00"
+                required
+                onchange="calcTotal()"
+              >
+
+            </div>
+
+            <!-- TOTAL -->
+
+            <div class="col-md-4">
+
+              <label class="f-label">Total Price (₹)</label>
+
+              <input
+                class="f-ctrl"
+                type="number"
+                step="0.01"
+                id="tprice"
+                readonly
+                style="
+                  background:rgba(245,158,11,.05);
+                  border-color:rgba(245,158,11,.2);
+                  color:var(--accent);
+                  font-weight:700;
+                "
+              >
+
+            </div>
+
+          </div>
+
+          <!-- LIVE TOTAL -->
+
+          <div
+            style="
+              background:rgba(245,158,11,.06);
+              border:1px solid rgba(245,158,11,.18);
+              border-radius:10px;
+              padding:1rem 1.25rem;
+              margin-top:1rem;
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+            "
+          >
+
+            <div>
+
+              <div
+                style="
+                  font-size:.68rem;
+                  color:#52525b;
+                  text-transform:uppercase;
+                  letter-spacing:1.5px;
+                "
+              >
+                Item Total
+              </div>
+
+              <div
+                id="liveTotal"
+                style="
+                  font-family:'Barlow Condensed',sans-serif;
+                  font-size:2rem;
+                  font-weight:800;
+                  color:var(--accent);
+                "
+              >
+                ₹0.00
+              </div>
+
+            </div>
+
+            <i
+              class="bi bi-calculator"
+              style="font-size:1.8rem;color:rgba(245,158,11,.3);"
+            ></i>
+
+          </div>
+
+          <hr class="divider">
+
+          <div class="d-flex gap-2">
+
+            <button type="submit" class="btn-y">
+              <i class="bi bi-check-lg"></i>
+              Add Item
+            </button>
+
+            <a href="/vieworderitem/" class="btn-o">
+              <i class="bi bi-x"></i>
+              Cancel
+            </a>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+
+  <div class="col-lg-5">
+
+    <div class="card fu" style="animation-delay:.1s">
+
+      <div class="card-head">
+
+        <h5>
+          <i class="bi bi-info-circle me-2" style="color:var(--accent-b)"></i>
+          How It Works
+        </h5>
+
+      </div>
+
+      <div class="card-body-pad">
+
+        <div style="display:flex;flex-direction:column;gap:.85rem;">
+
+          <div style="display:flex;gap:.75rem;">
+
+            <div style="
+              width:24px;
+              height:24px;
+              background:var(--accent);
+              border-radius:50%;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              font-weight:800;
+              font-size:.72rem;
+              color:#000;
+            ">
+              1
+            </div>
+
+            <div style="font-size:.83rem;">
+              <strong>Select Order</strong>
+              — Choose the parent order.
+            </div>
+
+          </div>
+
+          <div style="display:flex;gap:.75rem;">
+
+            <div style="
+              width:24px;
+              height:24px;
+              background:var(--accent);
+              border-radius:50%;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              font-weight:800;
+              font-size:.72rem;
+              color:#000;
+            ">
+              2
+            </div>
+
+            <div style="font-size:.83rem;">
+              <strong>Select Material</strong>
+              — Price auto loads.
+            </div>
+
+          </div>
+
+          <div style="display:flex;gap:.75rem;">
+
+            <div style="
+              width:24px;
+              height:24px;
+              background:var(--accent);
+              border-radius:50%;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              font-weight:800;
+              font-size:.72rem;
+              color:#000;
+            ">
+              3
+            </div>
+
+            <div style="font-size:.83rem;">
+              <strong>Inventory Updates Automatically</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+function loadMaterialPrice(sel){
+
+    const opt = sel.options[sel.selectedIndex];
+
+    document.getElementById('uprice').value =
+        opt.dataset.price || '';
+
+    calcTotal();
+}
+
+function calcTotal(){
+
+    const q =
+        parseFloat(document.getElementById('qty').value) || 0;
+
+    const p =
+        parseFloat(document.getElementById('uprice').value) || 0;
+
+    const t = q * p;
+
+    document.getElementById('tprice').value =
+        t.toFixed(2);
+
+    document.getElementById('liveTotal').textContent =
+        '₹' + t.toLocaleString(
+            'en-IN',
+            {minimumFractionDigits:2}
+        );
+}
+
+</script>
+
+{% endblock %}

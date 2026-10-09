@@ -1,0 +1,635 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuildTrack - Smart Material Management</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --border:#e2e8f0;
+    --black:#0f172a;
+    --yellow:#ffe500;
+    --purple:#7b2fff;
+    --white:#ffffff;
+    --gray:#64748b;
+}
+
+body{
+    background:var(--bg);
+    color:var(--black);
+    font-family:'Space Grotesk',sans-serif;
+    overflow-x:hidden;
+}
+
+/* NAVBAR */
+
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    background:rgba(248,250,252,.95);
+    backdrop-filter:blur(10px);
+    z-index:999;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:1.4rem;
+    font-weight:700;
+}
+
+.logo-circle{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:var(--yellow);
+    color:var(--black);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:30px;
+}
+
+.nav-links a{
+    color:var(--gray);
+    text-decoration:none;
+    font-weight:500;
+    transition:color .3s;
+}
+
+.nav-links a:hover{
+    color:var(--black);
+}
+
+.login-btn{
+    background:var(--yellow);
+    color:var(--black) !important;
+    padding:10px 24px;
+    border-radius:30px;
+    font-weight:700;
+    text-decoration:none;
+}
+
+/* HERO */
+
+.hero{
+    display:grid;
+    grid-template-columns:1.2fr 0.8fr;
+    gap:60px;
+    align-items:center;
+    min-height:calc(100vh - 83px);
+    padding:40px 80px;
+}
+
+.hero-left{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
+
+.hero-title{
+    font-size:4.2rem;
+    font-weight:700;
+    line-height:1.1;
+    letter-spacing:-1px;
+}
+
+.hero-desc{
+    color:var(--gray);
+    font-size:1.2rem;
+    line-height:1.6;
+    max-width:560px;
+}
+
+.hero-btns{
+    display:flex;
+    gap:20px;
+    margin-top:10px;
+}
+
+.hero-btn{
+    padding:16px 32px;
+    border-radius:30px;
+    font-weight:700;
+    text-decoration:none;
+    font-size:1.1rem;
+    transition:transform .3s, opacity .3s;
+}
+
+.hero-btn:hover{
+    transform:translateY(-2px);
+}
+
+.primary-btn{
+    background:var(--yellow);
+    color:var(--black);
+}
+
+.secondary-btn{
+    background:var(--card);
+    color:var(--black);
+    border:1px solid var(--border);
+}
+
+.hero-right{
+    display:flex;
+    justify-content:center;
+}
+
+.stats-card{
+    background:var(--purple);
+    color:var(--white);
+    border-radius:24px;
+    padding:30px;
+    width:100%;
+    max-width:440px;
+    box-shadow:0 20px 40px rgba(123, 79, 255, 0.3);
+}
+
+.stats-title{
+    font-size:1.2rem;
+    font-weight:600;
+    margin-bottom:24px;
+    opacity:0.9;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.stat-box{
+    background:rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:20px;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.stat-box h2{
+    font-size:2.5rem;
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.stat-box p{
+    font-size:0.9rem;
+    color:rgba(255,255,255,0.7);
+    font-weight:500;
+}
+
+/* FEATURES */
+
+.features{
+    padding:80px 40px;
+    border-top:1px solid var(--border);
+}
+
+.section-title{
+    text-align:center;
+    font-size:2.8rem;
+    margin-bottom:60px;
+}
+
+.features-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:30px;
+    max-width:1200px;
+    margin:0 auto;
+}
+
+.feature-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:40px 30px;
+    border-radius:20px;
+    transition:border-color .3s;
+}
+
+.feature-card:hover{
+    border-color:var(--purple);
+}
+
+.feature-icon{
+    width:50px;
+    height:50px;
+    background:rgba(123,47,255,.1);
+    color:var(--purple);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6rem;
+    margin-bottom:24px;
+}
+
+.feature-card h3{
+    font-size:1.4rem;
+    margin-bottom:12px;
+}
+
+.feature-card p{
+    color:var(--gray);
+    line-height:1.6;
+}
+
+/* ABOUT */
+
+.about-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:40px;
+    max-width:800px;
+    margin:0 auto;
+    line-height:1.8;
+    color:var(--gray);
+}
+
+/* REVIEWS */
+
+.reviews{
+    padding:80px 40px;
+    border-top:1px solid var(--border);
+}
+
+.reviews-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+    gap:30px;
+    max-width:1200px;
+    margin:0 auto;
+}
+
+.review-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:30px;
+    border-radius:20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    transition:border-color .3s, transform .3s;
+}
+
+.review-card:hover{
+    border-color:var(--yellow);
+    transform:translateY(-2px);
+}
+
+.review-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.reviewer-info h4{
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--black);
+}
+
+.reviewer-info p{
+    font-size:0.8rem;
+    color:var(--gray);
+    margin-top:2px;
+}
+
+.rating-stars{
+    color:var(--yellow);
+    display:flex;
+    gap:4px;
+    font-size:0.95rem;
+}
+
+.review-comment{
+    font-style:italic;
+    color:var(--gray);
+    font-size:0.95rem;
+    line-height:1.6;
+    flex:1;
+}
+
+.review-meta{
+    font-size:0.75rem;
+    color:var(--gray);
+    border-top:1px solid var(--border);
+    padding-top:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+/* FOOTER */
+
+.footer{
+    text-align:center;
+    padding:40px;
+    border-top:1px solid var(--border);
+    color:var(--gray);
+    font-size:0.9rem;
+}
+
+@media (max-width:992px){
+    .hero{
+        grid-template-columns:1fr;
+        padding:40px;
+        text-align:center;
+    }
+    .hero-left{
+        align-items:center;
+    }
+    .hero-title{
+        font-size:3rem;
+    }
+    .hero-desc{
+        font-size:1.1rem;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="logo">
+        <div class="logo-circle">
+            <i class="bi bi-check-lg" style="font-weight: 800; font-size: 1.2rem;"></i>
+        </div>
+        BUILDTRACK
+    </div>
+    <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#about">About</a>
+        <a href="/insertlogin/" class="login-btn">Login</a>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    
+    <div class="hero-left">
+        <h1 class="hero-title">Smart <span style="color:var(--yellow);">Material</span><br>Management System</h1>
+        <p class="hero-desc">BuildTrack helps construction companies manage inventory, suppliers, deliveries, orders, payments, and material tracking through one modern smart dashboard.</p>
+        <div class="hero-btns">
+            <a href="/insertlogin/" class="hero-btn primary-btn">Access Dashboard</a>
+            <a href="#features" class="hero-btn secondary-btn">Explore Features</a>
+        </div>
+    </div>
+
+    <div class="hero-right">
+        <div class="stats-card">
+            <div class="stats-title">Live Inventory Overview</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h2>{{ total_materials|default:"0" }}</h2>
+                    <p>Total Materials</p>
+                </div>
+                <div class="stat-box">
+                    <h2>{{ total_suppliers|default:"0" }}</h2>
+                    <p>Suppliers</p>
+                </div>
+                <div class="stat-box">
+                    <h2>{{ total_orders|default:"0" }}</h2>
+                    <p>Orders</p>
+                </div>
+                <div class="stat-box">
+                    <h2>{{ stock_percentage|default:"100" }}%</h2>
+                    <p>Stock Available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+
+    <h1 class="section-title">
+        Platform Features
+    </h1>
+
+    <div class="features-grid">
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <h3>Inventory Tracking</h3>
+            <p>
+                Real-time tracking of materials,
+                stock levels, and consumption.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <h3>Supplier Management</h3>
+            <p>
+                Manage supplier GST numbers,
+                addresses, ratings, and specialties.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-truck"></i>
+            </div>
+            <h3>Delivery Monitoring</h3>
+            <p>
+                Monitor logistics schedules, expected
+                delivery dates, and dispatch status.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="bi bi-currency-rupee"></i>
+            </div>
+            <h3>Payment Records</h3>
+            <p>
+                Maintain payment history and
+                supplier transaction records.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- LIVE REVIEWS -->
+<section class="reviews" id="reviews">
+    
+    <h1 class="section-title">
+        Live Customer Reviews
+    </h1>
+
+    <div class="reviews-grid">
+        
+        {% if latest_reviews %}
+            {% for r in latest_reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <h4>{{ r.reviewer.name }}</h4>
+                        <p>Site Manager / Professional Staff</p>
+                    </div>
+                    <div class="rating-stars">
+                        {% if r.rating >= 5 %}
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        {% elif r.rating == 4 %}
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
+                        {% elif r.rating == 3 %}
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i><i class="bi bi-star"></i>
+                        {% elif r.rating == 2 %}
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i>
+                        {% else %}
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <p class="review-comment">
+                    "{{ r.comments|default:"No written comments provided, but the rating speaks for itself!" }}"
+                </p>
+                
+                <div class="review-meta">
+                    <span>Material: <strong>{{ r.material.material_name }}</strong></span>
+                    <span>{{ r.review_date|date:"d M Y" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- FALLBACK DEMO TESTIMONIALS -->
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <h4>Raam</h4>
+                        <p>Site Manager, Shivaji Complex</p>
+                    </div>
+                    <div class="rating-stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                </div>
+                <p class="review-comment">
+                    "Superb steel quality! SteelCore Industries delivered Fe-500D rods exactly as requested with complete transparent tracking."
+                </p>
+                <div class="review-meta">
+                    <span>Material: <strong>Fe-500D TMT Steel Rods</strong></span>
+                    <span>May 27, 2026</span>
+                </div>
+            </div>
+            
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <h4>Suresh</h4>
+                        <p>Logistics Lead, Karrenavr Plot</p>
+                    </div>
+                    <div class="rating-stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                </div>
+                <p class="review-comment">
+                    "UltraTech Cement bags were fresh and delivered on time. The inventory automatically added the stock once marked delivered. Brilliant!"
+                </p>
+                <div class="review-meta">
+                    <span>Material: <strong>UltraTech Cement OPC 53</strong></span>
+                    <span>May 26, 2026</span>
+                </div>
+            </div>
+            
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <h4>Test User</h4>
+                        <p>Procurement Officer</p>
+                    </div>
+                    <div class="rating-stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                </div>
+                <p class="review-comment">
+                    "Payment processing was seamless. Cash on Delivery records sync in real-time across the admin financial audit portal."
+                </p>
+                <div class="review-meta">
+                    <span>Material: <strong>Premium Clay Red Bricks</strong></span>
+                    <span>May 25, 2026</span>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+</section>
+
+<!-- ABOUT -->
+<section class="features" id="about">
+
+    <h1 class="section-title">
+        About Project
+    </h1>
+
+    <div class="about-box">
+        <p>
+            <strong style="color:var(--black);font-size:1.2rem;">
+                BuildTrack
+            </strong>
+            is a Construction Material Management System developed to manage and monitor construction materials efficiently.
+        </p>
+        <br>
+        <p>
+            This project provides an easy way to handle supplier details, inventory management, material orders, deliveries, payments, reviews, and notifications through a centralized dashboard.
+        </p>
+        <br>
+        <p>
+            The system helps construction companies reduce manual work and improve material tracking for different project sites.
+        </p>
+        <br>
+        <p>
+            Users can monitor stock availability, manage supplier information, track deliveries, and maintain payment records easily.
+        </p>
+        <br>
+    </div>
+
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+    © 2026 BuildTrack - Smart Construction Material Management System
+</div>
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Record Payment | BuildTrack{% endblock %}
+{% block page_title %}New Payment{% endblock %}
+{% block nav_pay %}active{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+  <a href="/viewpayment/">Payments</a><span class="sep">/</span><span class="cur">Record New</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card fu">
+      <div class="card-head">
+        <h5><i class="bi bi-wallet2 me-2" style="color:var(--accent)"></i>Transaction Details</h5>
+      </div>
+      <div class="card-body-pad">
+        <form method="post">{% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="f-label">Link to Order *</label>
+              <select class="f-ctrl" name="t1" required>
+                <option value="">— Select Order —</option>
+                {% for o in orders %}
+                <option value="{{ o.id }}">Order #{{ o.id }} ({{ o.supplier }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="f-label">Supplier Name *</label>
+              <input class="f-ctrl" type="text" name="t2" placeholder="e.g. UltraTech Cement" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Payment Amount (₹) *</label>
+              <input class="f-ctrl" type="number" step="0.01" name="t3" placeholder="0.00" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Payment Date *</label>
+              <input class="f-ctrl" type="date" name="t4" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Payment Method</label>
+              <select class="f-ctrl" name="t5">
+                <option value="UPI">UPI / GPay</option>
+                <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+                <option value="Cash">Cash</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="f-label">Transaction / Ref ID</label>
+              <input class="f-ctrl" type="text" name="t6" placeholder="TXN123456789">
+            </div>
+
+            <div class="col-12">
+              <label class="f-label">Payment Status</label>
+              <select class="f-ctrl" name="t7">
+                <option value="Pending">⏳ Pending</option>
+                <option value="Completed">✅ Completed</option>
+                <option value="Failed">❌ Failed</option>
+              </select>
+            </div>
+          </div>
+
+          <hr class="divider">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-y"><i class="bi bi-shield-lock-fill"></i> Save Record</button>
+            <a href="/viewpayment/" class="btn-o"><i class="bi bi-x"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="card-head"><h5><i class="bi bi-info-circle me-2" style="color:var(--accent-b)"></i>Finance Audit</h5></div>
+      <div class="card-body-pad">
+        <div style="font-size:.8rem; color:var(--muted); line-height:1.6;">
+          <p>Ensure that the <strong>Transaction ID</strong> is double-checked before saving. Once a payment is marked as "Completed", it will appear in the supplier's balance statement.</p>
+          <div style="background:rgba(16,185,129,.1); border-radius:8px; padding:10px; margin-top:15px;">
+            <i class="bi bi-check-circle-fill me-2" style="color:var(--accent-g)"></i>
+            <span style="color:var(--dim)">Safe & Encrypted Transaction Record.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
